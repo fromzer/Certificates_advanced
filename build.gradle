@@ -1,0 +1,32 @@
+plugins {
+    id "org.sonarqube" version "3.1.1"
+}
+allprojects {
+    apply plugin: 'java'
+
+    group 'com.epam.esm'
+    version '1.0-SNAPSHOT'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
+        annotationProcessor 'org.projectlombok:lombok:1.18.18'
+    }
+}
+sonarqube {
+    properties {
+        property 'sonar.projectKey', 'Certificates-1.0-SNAPSHOT'
+        property 'sonar.host.url', 'http://192.168.182.129:9000'
+        property 'sonar.login', 'ce99dec55af4a951cbbcff0b864cddd45f8c2902'
+    }
+}
+
+
+
