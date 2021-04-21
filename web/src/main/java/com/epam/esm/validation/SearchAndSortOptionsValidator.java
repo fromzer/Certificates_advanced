@@ -1,6 +1,6 @@
 package com.epam.esm.validation;
 
-import com.epam.esm.model.SearchAndSortGiftCertificateOptions;
+import com.epam.esm.dto.SearchAndSortParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
@@ -27,13 +27,13 @@ public class SearchAndSortOptionsValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return SearchAndSortGiftCertificateOptions.class.equals(clazz);
+        return SearchAndSortParams.class.equals(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
         Locale locale = Locale.getDefault();
-        SearchAndSortGiftCertificateOptions options = (SearchAndSortGiftCertificateOptions) target;
+        SearchAndSortParams options = (SearchAndSortParams) target;
         if (options.getTag() != null && !options.getTag().matches(NAME_VALIDATION_PATTERN)) {
             errors.reject("400", messageSource.getMessage(VALIDATE_TAG_NAME_MESSAGE, null, locale));
         }

@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.dto.Pageable;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftTag;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,18 +35,17 @@ import java.util.List;
 public class TagController {
 
     private GiftTagService tagService;
-    private TagValidator tagValidator;
+//    private TagValidator tagValidator;
 
     @Autowired
-    public TagController(GiftTagService tagService, TagValidator tagValidator) {
+    public TagController(GiftTagService tagService) {
         this.tagService = tagService;
-        this.tagValidator = tagValidator;
     }
 
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.addValidators(tagValidator);
-    }
+//    @InitBinder
+//    public void initBinder(WebDataBinder binder) {
+//        binder.addValidators(tagValidator);
+//    }
 
     /**
      * Create tag
@@ -90,7 +91,7 @@ public class TagController {
      * @throws ResourceNotFoundException the resource not found exception
      */
     @GetMapping
-    public ResponseEntity<List<GiftTag>> getAll() {
-        return ResponseEntity.ok(tagService.findAll());
+    public ResponseEntity<List<GiftTag>> getAll(@ModelAttribute Pageable pageable) {
+        return ResponseEntity.ok(tagService.findAll(pageable));
     }
 }

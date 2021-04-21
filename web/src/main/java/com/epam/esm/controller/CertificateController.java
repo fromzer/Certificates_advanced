@@ -1,11 +1,12 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.dto.Pageable;
+import com.epam.esm.dto.SearchAndSortParams;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.DeleteResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
-import com.epam.esm.model.SearchAndSortGiftCertificateOptions;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.validation.CertificateValidator;
 import com.epam.esm.validation.SearchAndSortOptionsValidator;
@@ -49,14 +50,14 @@ public class CertificateController {
         this.optionsValidator = optionsValidator;
     }
 
-    @InitBinder
-    protected void initBinderCreate(WebDataBinder binder) {
-        if (binder.getTarget() instanceof GiftCertificate) {
-            binder.addValidators(certificateValidator);
-        } else if (binder.getTarget() instanceof SearchAndSortGiftCertificateOptions) {
-            binder.addValidators(optionsValidator);
-        }
-    }
+//    @InitBinder
+//    protected void initBinderCreate(WebDataBinder binder) {
+//        if (binder.getTarget() instanceof GiftCertificate) {
+//            binder.addValidators(certificateValidator);
+//        } else if (binder.getTarget() instanceof SearchAndSortParams) {
+//            binder.addValidators(optionsValidator);
+//        }
+//    }
 
     /**
      * Create certificate
@@ -112,12 +113,13 @@ public class CertificateController {
     /**
      * Get certificates by parameters
      *
-     * @param options the search and sort params
+     * @param params the search and sort params
      * @return list of giftCertificate
      */
     @GetMapping
     public ResponseEntity<List<GiftCertificate>> getCertificatesWithParameters(
-            @ModelAttribute SearchAndSortGiftCertificateOptions options) {
-        return ResponseEntity.ok(giftCertificateService.findCertificateByParams(options));
+            @ModelAttribute SearchAndSortParams params,
+            @ModelAttribute Pageable pageable) {
+        return ResponseEntity.ok(giftCertificateService.findCertificateByParams(params, pageable));
     }
 }
