@@ -1,4 +1,4 @@
-package com.epam.esm.dto;
+package com.epam.esm.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class TagDTO {
+public class UserGift {
     private Long id;
-    private String name;
+    private String login;
+    private String firstName;
+    private String lastName;
 }
