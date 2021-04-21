@@ -1,9 +1,11 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.Pageable;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.DeleteResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,7 +14,7 @@ import java.util.List;
  * @author Egor Miheev
  * @version 1.0.0
  */
-public interface GiftService<T> {
+public interface GiftService<T> extends Serializable {
     /**
      * Create entity
      *
@@ -43,5 +45,5 @@ public interface GiftService<T> {
      * @return List of entities
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
-    List<T> findAll() throws ResourceNotFoundException;
+    List<T> findAll(Pageable pageable) throws ResourceNotFoundException;
 }

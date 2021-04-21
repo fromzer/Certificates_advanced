@@ -1,9 +1,10 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.Pageable;
+import com.epam.esm.dto.SearchAndSortParams;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
-import com.epam.esm.model.SearchAndSortGiftCertificateOptions;
 
 import java.util.List;
 
@@ -30,5 +31,5 @@ public interface GiftCertificateService extends GiftService<GiftCertificate> {
      * @return list of GiftCertificates
      * @throws ResourceNotFoundException if fail to retrieve data
      */
-    List<GiftCertificate> findCertificateByParams(SearchAndSortGiftCertificateOptions options) throws ResourceNotFoundException;
+    List<GiftCertificate> findCertificateByParams(SearchAndSortParams params, Pageable pageable) throws ResourceNotFoundException;
 }
