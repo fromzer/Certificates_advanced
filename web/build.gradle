@@ -1,25 +1,19 @@
-plugins {
-    id 'war'
-}
-
-war {
-    archivesBaseName = 'Certificates'
-    version '1.0-SNAPSHOT'
-}
-
 dependencies {
     implementation project(':persistence')
     implementation project(':service')
     implementation project(':api')
-    implementation group: 'org.springframework', name: 'spring-context', version: springVersion
-    implementation group: 'org.springframework', name: 'spring-webmvc', version: springVersion
-    implementation group: 'org.springframework', name: 'spring-web', version: springVersion
-    implementation group: 'org.springframework', name: 'spring-context-support', version: springVersion
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
     compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: jxServletApiVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatatypeVersion
     implementation group: 'javax.validation', name: 'validation-api', version: jxValidationApiVersion
-    testCompile group: 'org.springframework', name: 'spring-test', version: springVersion
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.+'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+bootRun {
+    mainClass = 'com.epam.esm.Application'
 }

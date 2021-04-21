@@ -5,18 +5,21 @@ plugins {
 dependencies {
     implementation project(':persistence')
     implementation project(':api')
-    implementation group: 'org.springframework', name: 'spring-context', version: springVersion
-    implementation group: 'org.springframework', name: 'spring-core', version: springVersion
+    implementation 'org.springframework.boot:spring-boot-starter'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation group: 'mysql', name: 'mysql-connector-java', version: mysqlConnectorVersion
-    implementation group: 'org.springframework', name: 'spring-jdbc', version: springVersion
-    implementation group: 'org.springframework', name: 'spring-tx', version: springVersion
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    testCompile group: 'org.springframework', name: 'spring-test', version: springVersion
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: commonsCollectionsVers
+    implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.0'
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.+'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: mockitoVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+}
+
+jar {
+    enabled = true
 }
 
 test {
