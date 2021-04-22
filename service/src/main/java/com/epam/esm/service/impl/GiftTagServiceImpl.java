@@ -1,7 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftTagDAOImpl;
-import com.epam.esm.dto.Pageable;
+import com.epam.esm.model.Pageable;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.CreateEntityException;
 import com.epam.esm.exception.CreateResourceException;
@@ -32,7 +32,6 @@ public class GiftTagServiceImpl implements GiftTagService {
         this.tagDAO = tagDAO;
         this.modelMapper = modelMapper;
     }
-
 
     @Override
     @Transactional
@@ -70,7 +69,16 @@ public class GiftTagServiceImpl implements GiftTagService {
     }
 
     @Override
-    @Transactional
+    public GiftTag findMostPopularUserTag(Long userId) throws ResourceNotFoundException {
+        Tag mostPopularUserTag = tagDAO.findMostPopularUserTag(userId);
+        GiftTag popularGiftTag = null;
+        if (mostPopularUserTag != null) {
+            popularGiftTag = modelMapper.map(mostPopularUserTag, GiftTag.class);
+        }
+        return popularGiftTag;
+    }
+
+    @Override
     public void delete(Long id) throws DeleteResourceException {
         try {
             Tag byId = tagDAO.findById(id);

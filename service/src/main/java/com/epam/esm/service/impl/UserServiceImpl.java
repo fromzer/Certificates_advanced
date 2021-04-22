@@ -1,7 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.UserDaoImpl;
-import com.epam.esm.dto.Pageable;
+import com.epam.esm.model.Pageable;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.UserGift;
 import com.epam.esm.service.UserService;
@@ -34,10 +34,5 @@ public class UserServiceImpl implements UserService {
                 .map(user -> modelMapper.map(user, UserGift.class))
                 .collect(Collectors.toList());
         return users;
-    }
-
-    @Override
-    public UserGift findByName(String name) throws ResourceNotFoundException {
-        return modelMapper.map(userDao.findByName(name), UserGift.class);
     }
 }

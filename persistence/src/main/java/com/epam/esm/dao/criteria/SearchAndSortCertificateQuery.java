@@ -1,6 +1,6 @@
 package com.epam.esm.dao.criteria;
 
-import com.epam.esm.dto.SearchAndSortParams;
+import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.entity.Certificate;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -8,11 +8,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-public class SearchAndSortQuery implements QueryConstructor<SearchAndSortParams, Certificate>{
+public class SearchAndSortCertificateQuery implements QueryConstructor<SearchAndSortCertificateParams, Certificate>{
     private static final String MINUS = "-";
     private static final String EMPTY = "";
     @Override
-    public void createQuery(SearchAndSortParams params, CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicate) {
+    public void createQuery(SearchAndSortCertificateParams params, CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicate) {
         if (params.getSort() != null) {
             paramsSortIsNotEmpty(params, cb, cr, root, predicate);
         } else {
@@ -20,7 +20,7 @@ public class SearchAndSortQuery implements QueryConstructor<SearchAndSortParams,
         }
     }
 
-    private void paramsSortIsNotEmpty(SearchAndSortParams params, CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicateSearchParams) {
+    private void paramsSortIsNotEmpty(SearchAndSortCertificateParams params, CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicateSearchParams) {
         //
         String sortColumn = params.getSort().replace(MINUS, EMPTY).trim();
         if (params.getSort().startsWith(MINUS)) {

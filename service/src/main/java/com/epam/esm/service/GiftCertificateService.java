@@ -1,7 +1,9 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.Pageable;
-import com.epam.esm.dto.SearchAndSortParams;
+import com.epam.esm.exception.CreateResourceException;
+import com.epam.esm.exception.DeleteResourceException;
+import com.epam.esm.model.Pageable;
+import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
@@ -14,7 +16,39 @@ import java.util.List;
  * @author Egor Miheev
  * @version 1.0.0
  */
-public interface GiftCertificateService extends GiftService<GiftCertificate> {
+public interface GiftCertificateService {
+    /**
+     * Create entity
+     *
+     * @param giftCertificate an entity of business model
+     * @return entity id
+     * @throws CreateResourceException if error is occurred during SQL command execution
+     */
+    Long create(GiftCertificate giftCertificate) throws CreateResourceException;
+
+    /**
+     * Find entity
+     *
+     * @return entity
+     * @throws ResourceNotFoundException if fail to retrieve data from DB
+     */
+    GiftCertificate findById(Long id) throws ResourceNotFoundException;
+
+    /**
+     * Delete entity
+     *
+     * @throws DeleteResourceException if error is occurred during SQL command execution
+     */
+    void delete(Long id) throws DeleteResourceException, ResourceNotFoundException;
+
+    /**
+     * Find all entities
+     *
+     * @return List of entities
+     * @throws ResourceNotFoundException if fail to retrieve data from DB
+     */
+    List<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException;
+
     /**
      * Update entity
      *
@@ -31,5 +65,5 @@ public interface GiftCertificateService extends GiftService<GiftCertificate> {
      * @return list of GiftCertificates
      * @throws ResourceNotFoundException if fail to retrieve data
      */
-    List<GiftCertificate> findCertificateByParams(SearchAndSortParams params, Pageable pageable) throws ResourceNotFoundException;
+    List<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException;
 }

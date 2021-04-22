@@ -1,7 +1,7 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.dto.Pageable;
-import com.epam.esm.dto.SearchAndSortParams;
+import com.epam.esm.model.Pageable;
+import com.epam.esm.model.SearchAndSortCertificateParams;
 import org.springframework.data.domain.Persistable;
 
 import java.io.Serializable;
@@ -16,7 +16,7 @@ public interface GiftCertificateDao<T extends Persistable<? extends Serializable
 
     List<T> findAll(Pageable pageable);
 
-    List<T> findEntitiesByParams(SearchAndSortParams params, Pageable pageable);
+    List<T> findEntitiesByParams(SearchAndSortCertificateParams params, Pageable pageable);
 
     void delete(T entity);
 }

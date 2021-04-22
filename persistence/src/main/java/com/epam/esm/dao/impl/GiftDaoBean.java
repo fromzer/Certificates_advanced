@@ -11,5 +11,4 @@ import java.io.Serializable;
 @Scope("prototype")
 public class GiftDaoBean<T extends Persistable<? extends Serializable>>
         extends AbstractGiftDAO<T> {
-
 }

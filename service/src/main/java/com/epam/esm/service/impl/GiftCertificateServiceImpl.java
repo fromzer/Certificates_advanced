@@ -1,8 +1,8 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftCertificateDAOImpl;
-import com.epam.esm.dto.Pageable;
-import com.epam.esm.dto.SearchAndSortParams;
+import com.epam.esm.model.Pageable;
+import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.exception.CreateEntityException;
 import com.epam.esm.exception.CreateResourceException;
@@ -21,18 +21,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@Transactional
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private static final Logger logger = LoggerFactory.getLogger(GiftCertificateServiceImpl.class);
 
@@ -46,6 +47,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
+    @Transactional
     public GiftCertificate update(GiftCertificate giftCertificate, Long id) throws UpdateResourceException {
         GiftCertificate existing = findById(id);
         if (existing != null) {
@@ -63,6 +65,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
+    @Transactional
     public Long create(GiftCertificate giftCertificate) throws CreateResourceException {
         giftCertificate.setCreateDate(ZonedDateTime.now(ZoneId.systemDefault()));
         giftCertificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.systemDefault()));
@@ -120,7 +123,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificate> findCertificateByParams(SearchAndSortParams params, Pageable pageable) throws ResourceNotFoundException {
+    public List<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException {
         try {
             List<GiftCertificate> giftCertificates;
             if (Stream.of(params.getTag(), params.getName(), params.getDescription(),

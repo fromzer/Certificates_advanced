@@ -1,6 +1,6 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.dto.Pageable;
+import com.epam.esm.model.Pageable;
 import org.springframework.data.domain.Persistable;
 
 import java.io.Serializable;
@@ -12,6 +12,8 @@ public interface GiftTagDao<T extends Persistable<? extends Serializable>> {
     T findById(Long id);
 
     T findByName(String name);
+
+    T findMostPopularUserTag(Long userId);
 
     List<T> findAll(Pageable pageable);
 
