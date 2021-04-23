@@ -5,6 +5,7 @@ import com.epam.esm.dao.criteria.QueryConstructor;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.model.SearchAndSortParams;
+import org.hibernate.Session;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.EntityManager;
@@ -17,7 +18,9 @@ import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializable>> implements GiftDAO<T> {
@@ -95,7 +98,8 @@ public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializab
         Query query = getEm().createQuery(cr);
         query.setFirstResult((pageable.getPage() - ONE) * pageable.getSize());
         query.setMaxResults(pageable.getSize());
-        return query.getResultList();
+        List resultList = query.getResultList();
+        return (List<T>) resultList.stream().distinct().collect(Collectors.toList());
     }
 
     @Override

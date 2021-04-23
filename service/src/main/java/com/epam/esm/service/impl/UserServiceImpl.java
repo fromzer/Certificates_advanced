@@ -30,9 +30,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserGift> findAll(Pageable pageable) throws ResourceNotFoundException {
-        List<UserGift> users = userDao.findAll(pageable).stream()
+        return userDao.findAll(pageable).stream()
                 .map(user -> modelMapper.map(user, UserGift.class))
                 .collect(Collectors.toList());
-        return users;
     }
 }

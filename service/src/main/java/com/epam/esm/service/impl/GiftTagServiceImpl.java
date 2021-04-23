@@ -1,12 +1,11 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftTagDAOImpl;
+import com.epam.esm.exception.NoPaginationSpecifiedException;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.CreateEntityException;
 import com.epam.esm.exception.CreateResourceException;
-import com.epam.esm.exception.DeleteEntityException;
-import com.epam.esm.exception.DeleteResourceException;
 import com.epam.esm.exception.EntityRetrievalException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftTag;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,16 +46,9 @@ public class GiftTagServiceImpl implements GiftTagService {
 
     @Override
     public GiftTag findById(Long id) throws ResourceNotFoundException {
-        try {
-            Tag byId = tagDAO.findById(id);
-            if (byId == null) {
-                throw new ResourceNotFoundException("Tag is not found");
-            }
-            return modelMapper.map(byId, GiftTag.class);
-        } catch (EntityRetrievalException e) {
-            log.error("Failed to create tag", e);
-            throw new ResourceNotFoundException("Failed to create tag", e);
-        }
+        Tag byId = Optional.ofNullable(tagDAO.findById(id))
+                .orElseThrow(ResourceNotFoundException::new);
+        return modelMapper.map(byId, GiftTag.class);
     }
 
     @Override
@@ -70,36 +63,26 @@ public class GiftTagServiceImpl implements GiftTagService {
 
     @Override
     public GiftTag findMostPopularUserTag(Long userId) throws ResourceNotFoundException {
-        Tag mostPopularUserTag = tagDAO.findMostPopularUserTag(userId);
-        GiftTag popularGiftTag = null;
-        if (mostPopularUserTag != null) {
-            popularGiftTag = modelMapper.map(mostPopularUserTag, GiftTag.class);
-        }
-        return popularGiftTag;
+        return Optional.ofNullable(tagDAO.findMostPopularUserTag(userId))
+                .map(tag -> modelMapper.map(tag, GiftTag.class))
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
-    public void delete(Long id) throws DeleteResourceException {
-        try {
-            Tag byId = tagDAO.findById(id);
-            if (byId != null) {
-                tagDAO.delete(byId);
-            } else {
-                throw new ResourceNotFoundException();
-            }
-        } catch (DeleteEntityException e) {
-            log.error("Failed to delete tag", e);
-            throw new DeleteResourceException("Failed to delete tag", e);
-        }
+    public void delete(Long id) {
+        Tag byId = Optional.ofNullable(tagDAO.findById(id))
+                .orElseThrow(ResourceNotFoundException::new);
+        tagDAO.delete(byId);
     }
 
     @Override
     public List<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException {
-        List<Tag> allTags = (pageable.getPage() <= 0 || pageable.getSize() <= 0) ?
-                null : tagDAO.findAll(pageable);
+        List<Tag> tags = Optional.ofNullable(pageable)
+                .map(tagDAO::findAll)
+                .orElseThrow(NoPaginationSpecifiedException::new);
         List<GiftTag> convertedAllTags = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(allTags)) {
-            convertedAllTags = allTags.stream()
+        if (CollectionUtils.isNotEmpty(tags)) {
+            convertedAllTags = tags.stream()
                     .map(tag -> modelMapper.map(tag, GiftTag.class))
                     .collect(Collectors.toList());
         }

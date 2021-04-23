@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftCertificateDAOImpl;
+import com.epam.esm.exception.NoPaginationSpecifiedException;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.entity.Certificate;
@@ -28,6 +29,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,12 +51,15 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     @Transactional
     public GiftCertificate update(GiftCertificate giftCertificate, Long id) throws UpdateResourceException {
-        GiftCertificate existing = findById(id);
-        if (existing != null) {
-            Set<GiftTag> tags = existing.getTags();
-            GiftServiceUtils.copyNonNullProperties(giftCertificate, existing);
-            existing.getTags().addAll(tags);
-        }
+        GiftCertificate existing = Optional.ofNullable(findById(id))
+                .map(certificate -> {
+                    Set<GiftTag> tags = certificate.getTags();
+                    GiftServiceUtils.copyNonNullProperties(giftCertificate, certificate);
+                    certificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.systemDefault()));
+                    certificate.getTags().addAll(tags);
+                    return certificate;
+                })
+                .orElseThrow(ResourceNotFoundException::new);
         try {
             Certificate modified = giftCertificateDAO.update(modelMapper.map(existing, Certificate.class));
             return modelMapper.map(modified, GiftCertificate.class);
@@ -80,11 +85,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     public GiftCertificate findById(Long id) throws ResourceNotFoundException {
         try {
-            Certificate byId = giftCertificateDAO.findById(id);
+            Certificate byId = Optional.ofNullable(giftCertificateDAO.findById(id))
+                    .orElseThrow(ResourceNotFoundException::new);
             GiftCertificate giftCertificateById = modelMapper.map(byId, GiftCertificate.class);
-            if (giftCertificateById == null) {
-                throw new ResourceNotFoundException("Certificate is not found");
-            }
             return giftCertificateById;
         } catch (EntityRetrievalException e) {
             logger.error("Failed to find certificate by id", e);
@@ -94,25 +97,16 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public void delete(Long id) throws DeleteResourceException {
-        try {
-            Certificate byId = giftCertificateDAO.findById(id);
-            if (byId != null) {
-                giftCertificateDAO.delete(byId);
-            } else {
-                throw new ResourceNotFoundException();
-            }
-        } catch (DeleteEntityException | ResourceNotFoundException e) {
-            logger.error("Failed to delete certificate", e);
-            throw new DeleteResourceException("Failed to delete certificate", e);
-        }
+        Certificate byId = Optional.ofNullable(giftCertificateDAO.findById(id))
+                .orElseThrow(ResourceNotFoundException::new);
+        giftCertificateDAO.delete(byId);
     }
 
     @Override
     public List<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException {
-
-        List<Certificate> certificates = (pageable.getPage() <= 0 || pageable.getSize() <= 0) ?
-                null :
-                giftCertificateDAO.findAll(pageable);
+        List<Certificate> certificates = Optional.ofNullable(pageable)
+                .map(giftCertificateDAO::findAll)
+                .orElseThrow(NoPaginationSpecifiedException::new);
         List<GiftCertificate> giftCertificates = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(certificates)) {
             giftCertificates = certificates.stream()

@@ -1,5 +1,6 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.entity.Order;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchOrderByUserIdParams;
 import org.springframework.data.domain.Persistable;
@@ -7,16 +8,16 @@ import org.springframework.data.domain.Persistable;
 import java.io.Serializable;
 import java.util.List;
 
-public interface OrderDao<T extends Persistable<? extends Serializable>> {
-    Long create(T entity);
+public interface OrderDao {
+    Long create(Order entity);
 
-    T findById(Long id);
+    Order findById(Long id);
 
-    T findByUserIdAndOrderId(Long orderId, Long userId);
+    Order findByUserIdAndOrderId(Long orderId, Long userId);
 
-    List<T> findAll(Pageable pageable);
+    List<Order> findAll(Pageable pageable);
 
-    void delete(T entity);
+    void delete(Order entity);
 
-    List<T> findOrdersByUserId(SearchOrderByUserIdParams params, Pageable pageable);
+    List<Order> findOrdersByUserId(SearchOrderByUserIdParams params, Pageable pageable);
 }

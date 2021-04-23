@@ -1,21 +1,22 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.entity.Tag;
 import com.epam.esm.model.Pageable;
 import org.springframework.data.domain.Persistable;
 
 import java.io.Serializable;
 import java.util.List;
 
-public interface GiftTagDao<T extends Persistable<? extends Serializable>> {
-    Long create(T entity);
+public interface GiftTagDao {
+    Long create(Tag entity);
 
-    T findById(Long id);
+    Tag findById(Long id);
 
-    T findByName(String name);
+    Tag findByName(String name);
 
-    T findMostPopularUserTag(Long userId);
+    Tag findMostPopularUserTag(Long userId);
 
-    List<T> findAll(Pageable pageable);
+    List<Tag> findAll(Pageable pageable);
 
-    void delete(T entity);
+    void delete(Tag entity);
 }

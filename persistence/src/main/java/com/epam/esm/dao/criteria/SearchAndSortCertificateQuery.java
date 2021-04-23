@@ -7,17 +7,18 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.Optional;
 
-public class SearchAndSortCertificateQuery implements QueryConstructor<SearchAndSortCertificateParams, Certificate>{
+public class SearchAndSortCertificateQuery implements QueryConstructor<SearchAndSortCertificateParams, Certificate> {
     private static final String MINUS = "-";
     private static final String EMPTY = "";
+
     @Override
     public void createQuery(SearchAndSortCertificateParams params, CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicate) {
-        if (params.getSort() != null) {
-            paramsSortIsNotEmpty(params, cb, cr, root, predicate);
-        } else {
-            isEmptySortParams(cb, cr, root, predicate);
-        }
+        Optional.ofNullable(params.getSort())
+                .ifPresentOrElse(
+                        v -> paramsSortIsNotEmpty(params, cb, cr, root, predicate),
+                        () -> isEmptySortParams(cb, cr, root, predicate));
     }
 
     private void paramsSortIsNotEmpty(SearchAndSortCertificateParams params, CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicateSearchParams) {
@@ -32,10 +33,10 @@ public class SearchAndSortCertificateQuery implements QueryConstructor<SearchAnd
     }
 
     private void isEmptySortParams(CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicateSearchParams) {
-        if (predicateSearchParams != null) {
-            cr.select(root).where(cb.and(predicateSearchParams));
-        } else {
-            cr.select(root).where();
-        }
+        Optional.ofNullable(predicateSearchParams)
+                .ifPresentOrElse(
+                        v -> cr.select(root).where(cb.and(predicateSearchParams)),
+                        () -> cr.select(root).where()
+                );
     }
 }

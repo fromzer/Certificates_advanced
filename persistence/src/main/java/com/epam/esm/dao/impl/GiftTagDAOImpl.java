@@ -14,7 +14,7 @@ import java.util.List;
 @Slf4j
 @Repository
 @Transactional
-public class GiftTagDAOImpl implements GiftTagDao<Tag> {
+public class GiftTagDAOImpl implements GiftTagDao {
     private static final String SQL_SELECT_MOST_POPULAR_USER_TAG = "SELECT id, name from (" +
             "SELECT t.id, t.name, count(*) as quantity, sum(cost) as sum_cost, user_id " +
             "from orders " +

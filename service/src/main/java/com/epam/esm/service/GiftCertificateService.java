@@ -61,7 +61,7 @@ public interface GiftCertificateService {
     /**
      * Find entity
      *
-     * @param options the search options
+     * @param params the search options
      * @return list of GiftCertificates
      * @throws ResourceNotFoundException if fail to retrieve data
      */

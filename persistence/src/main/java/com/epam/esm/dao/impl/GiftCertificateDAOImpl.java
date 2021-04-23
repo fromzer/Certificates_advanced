@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @Repository
 @Transactional
-public class GiftCertificateDAOImpl implements GiftCertificateDao<Certificate> {
+public class GiftCertificateDAOImpl implements GiftCertificateDao {
 
     private final GiftDaoBean<Certificate> giftDao;
 

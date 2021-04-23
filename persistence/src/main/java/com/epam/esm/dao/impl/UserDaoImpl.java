@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class UserDaoImpl implements UserDao<User> {
+public class UserDaoImpl implements UserDao {
 
     private final GiftDaoBean<User> giftDao;
 

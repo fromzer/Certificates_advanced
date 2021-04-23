@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Repository
 @Transactional
-public class OrderDaoImpl implements OrderDao<Order> {
+public class OrderDaoImpl implements OrderDao {
     private static final String SELECT_ORDER_BY_USER_ID_AND_ORDER_ID = "SELECT id, cost, purchase_date, user_id FROM orders WHERE id = :id AND user_id = :userId";
     private static final String ID = "id";
     private static final String USER_ID = "userId";

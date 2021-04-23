@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -43,13 +44,11 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public Long createOrder(Long id, List<GiftCertificate> giftCertificates) throws CreateResourceException {
-        UserGift user = userService.findById(id);
-        if (user == null) {
-            throw new ResourceNotFoundException();
-        }
-        GiftOrder giftOrder = buildGiftOrder(giftCertificates, user);
-        Order order = mapper.map(giftOrder, Order.class);
-        return orderDao.create(order);
+        return Optional.ofNullable(userService.findById(id))
+                .map(userGift -> buildGiftOrder(giftCertificates, userGift))
+                .map(order -> mapper.map(order, Order.class))
+                .map(orderDao::create)
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     private GiftOrder buildGiftOrder(List<GiftCertificate> giftCertificates, UserGift userGift) {
@@ -70,17 +69,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public GiftOrderWithoutCertificatesAndUser findUserOrderInfo(Long orderId, Long userId) throws ResourceNotFoundException {
-        Order byId = orderDao.findByUserIdAndOrderId(orderId, userId);
-        if (byId != null) {
-            return mapper.map(byId, GiftOrderWithoutCertificatesAndUser.class);
-        }
-        throw new ResourceNotFoundException();
+        return Optional.ofNullable(orderDao.findByUserIdAndOrderId(orderId, userId))
+                .map(byId -> mapper.map(byId, GiftOrderWithoutCertificatesAndUser.class))
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
     public List<GiftOrder> findUserOrders(Long id, Pageable pageable) {
-        SearchOrderByUserIdParams params = new SearchOrderByUserIdParams(id);
-        List<Order> ordersByUserId = orderDao.findOrdersByUserId(params, pageable);
+        List<Order> ordersByUserId = orderDao.findOrdersByUserId(new SearchOrderByUserIdParams(id), pageable);
         return ordersByUserId.stream()
                 .map(order -> mapper.map(order, GiftOrder.class))
                 .collect(Collectors.toList());
