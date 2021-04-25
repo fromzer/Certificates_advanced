@@ -14,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GiftCertificate {
+public class GiftCertificate extends RepresentationModel<GiftCertificate> {
     private Long id;
     private String name;
     private String description;

@@ -1,5 +1,9 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.hateoas.GiftOrderWithoutCertificatesAndUserResource;
+import com.epam.esm.hateoas.OrderResource;
+import com.epam.esm.hateoas.TagResource;
+import com.epam.esm.hateoas.UserResource;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
@@ -9,6 +13,9 @@ import com.epam.esm.model.UserGift;
 import com.epam.esm.service.GiftTagService;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,15 +37,27 @@ public class UserController {
     private final OrderService orderService;
     private final GiftTagService tagService;
 
-    public UserController(UserService userService, OrderService orderService, GiftTagService tagService) {
+    private final UserResource userResource;
+    private final OrderResource orderResource;
+    private final TagResource tagResource;
+
+    public UserController(UserService userService,
+                          OrderService orderService,
+                          GiftTagService tagService,
+                          UserResource userResource,
+                          OrderResource orderResource,
+                          TagResource tagResource) {
         this.userService = userService;
         this.orderService = orderService;
         this.tagService = tagService;
+        this.userResource = userResource;
+        this.orderResource = orderResource;
+        this.tagResource = tagResource;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserGift> getUserById(@PathVariable @Min(value = 1) Long id) {
-        return ResponseEntity.ok(userService.findById(id));
+    public ResponseEntity<EntityModel<UserGift>> getUserById(@PathVariable @Min(value = 1) Long id) {
+        return ResponseEntity.ok(userResource.toModel(userService.findById(id)));
     }
 
     @PostMapping("/{id}/orders")
@@ -48,9 +67,9 @@ public class UserController {
     }
 
     @GetMapping("/{id}/orders")
-    public ResponseEntity<List<GiftOrder>> getUserOrders(@PathVariable @Min(value = 1) Long id,
-                                                         @ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(orderService.findUserOrders(id, pageable));
+    public ResponseEntity<CollectionModel<EntityModel<GiftOrder>>> getUserOrders(@PathVariable @Min(value = 1) Long id,
+                                                                    @ModelAttribute Pageable pageable) {
+        return ResponseEntity.ok(orderResource.toCollectionModel(orderService.findUserOrders(id, pageable)));
     }
 
     @GetMapping("/{id}/orders/{orderId}")
@@ -60,12 +79,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}/tag")
-    public ResponseEntity<GiftTag> getMostPopularUserTag(@PathVariable @Min(value = 1) Long id) {
-        return ResponseEntity.ok(tagService.findMostPopularUserTag(id));
+    public ResponseEntity<EntityModel<GiftTag>> getMostPopularUserTag(@PathVariable @Min(value = 1) Long id) {
+        return ResponseEntity.ok(tagResource.toModel(tagService.findMostPopularUserTag(id)));
     }
 
     @GetMapping
-    public ResponseEntity<List<UserGift>> getAll(@ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(userService.findAll(pageable));
+    public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(@ModelAttribute Pageable pageable) {
+        return ResponseEntity.ok(userResource.toCollectionModel(userService.findAll(pageable)));
     }
 }
