@@ -1,5 +1,6 @@
 package com.epam.esm.entity;
 
+import com.epam.esm.entity.audit.AuditListener;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -31,8 +33,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "gift_certificate")
-@Getter
-@Setter
+@Data
+@EntityListeners(AuditListener.class)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
