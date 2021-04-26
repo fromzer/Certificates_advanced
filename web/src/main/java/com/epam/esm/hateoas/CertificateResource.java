@@ -4,6 +4,7 @@ import com.epam.esm.controller.CertificateController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftTag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -11,12 +12,17 @@ import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class CertificateResource implements SimpleRepresentationModelAssembler<GiftCertificate> {
     private static final String FIND_BY_ID = "get_by_id";
+    private static final String FIND_TAG_BY_ID = "get_tag_by_id";
     private static final String FIND_ALL = "get_all";
     private static final String FIND_BY_PARAMS = "get_by_params";
     private static final String CREATE = "create";
@@ -36,8 +42,10 @@ public class CertificateResource implements SimpleRepresentationModelAssembler<G
 
     private void addTagLinks(EntityModel<GiftCertificate> resource) {
         for (final GiftTag tag : resource.getContent().getTags()) {
-            Link getTagById = linkTo(methodOn(TagController.class).getTagById(tag.getId())).withRel(FIND_BY_ID);
-            tag.add(getTagById);
+            Link getTagById = linkTo(methodOn(TagController.class).getTagById(tag.getId())).withSelfRel();
+            if (!tag.getLinks().contains(getTagById)) {
+                tag.add(getTagById);
+            }
         }
     }
 
