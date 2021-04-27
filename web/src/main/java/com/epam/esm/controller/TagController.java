@@ -6,13 +6,18 @@ import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftTag;
 import com.epam.esm.service.GiftTagService;
+import com.epam.esm.utils.PageableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,18 +40,21 @@ public class TagController {
 
     private final GiftTagService tagService;
     private final TagResource tagResource;
-//    private TagValidator tagValidator;
+    private final Validator tagValidator;
 
     @Autowired
-    public TagController(GiftTagService tagService, TagResource tagResource) {
+    public TagController(GiftTagService tagService,
+                         TagResource tagResource,
+                         @Qualifier("tagValidator") Validator tagValidator) {
         this.tagService = tagService;
         this.tagResource = tagResource;
+        this.tagValidator = tagValidator;
     }
 
-//    @InitBinder
-//    public void initBinder(WebDataBinder binder) {
-//        binder.addValidators(tagValidator);
-//    }
+    @InitBinder("tag")
+    public void initTagBinder(WebDataBinder binder) {
+        binder.addValidators(tagValidator);
+    }
 
     /**
      * Create tag
@@ -68,7 +76,7 @@ public class TagController {
      * @throws ResourceNotFoundException the resource not found exception
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<GiftTag> delete(@PathVariable @Min(value = 0) Long id) {
+    public ResponseEntity<GiftTag> delete(@PathVariable @Min(value = 1) Long id) {
         tagService.delete(id);
         return ResponseEntity.noContent().build();
     }
@@ -81,7 +89,7 @@ public class TagController {
      * @throws ResourceNotFoundException the resource not found exception
      */
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<GiftTag>> getTagById(@PathVariable @Min(value = 0) Long id) {
+    public ResponseEntity<EntityModel<GiftTag>> getTagById(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(tagResource.toModel(tagService.findById(id)));
     }
 
@@ -93,6 +101,9 @@ public class TagController {
      */
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<GiftTag>>> getAll(@ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(tagResource.toCollectionModel(tagService.findAll(pageable)));
+        return ResponseEntity.ok(
+                tagResource.toCollectionModel(
+                        tagService.findAll(
+                                PageableUtils.setDefaultValueIfEmpty(pageable))));
     }
 }

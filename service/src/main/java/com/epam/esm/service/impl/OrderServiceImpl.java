@@ -1,7 +1,9 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.OrderDaoImpl;
+import com.epam.esm.dao.impl.UserDaoImpl;
 import com.epam.esm.entity.Order;
+import com.epam.esm.entity.User;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftCertificate;
@@ -12,15 +14,12 @@ import com.epam.esm.model.SearchOrderByUserIdParams;
 import com.epam.esm.model.UserGift;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.OrderService;
-import com.epam.esm.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,40 +29,40 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
     private final OrderDaoImpl orderDao;
     private final ModelMapper mapper;
-    private final UserService userService;
+    private final UserDaoImpl userDao;
     private final GiftCertificateService certificateService;
 
+
     @Autowired
-    public OrderServiceImpl(OrderDaoImpl orderDao, ModelMapper mapper, UserService userService, GiftCertificateService certificateService) {
+    public OrderServiceImpl(OrderDaoImpl orderDao, ModelMapper mapper, GiftCertificateService certificateService, UserDaoImpl userDao) {
         this.orderDao = orderDao;
         this.mapper = mapper;
-        this.userService = userService;
         this.certificateService = certificateService;
+        this.userDao = userDao;
     }
 
     @Transactional
     @Override
     public Long createOrder(Long id, List<GiftCertificate> giftCertificates) throws CreateResourceException {
-        return Optional.ofNullable(userService.findById(id))
-                .map(userGift -> buildGiftOrder(giftCertificates, userGift))
+        return Optional.ofNullable(userDao.findById(id))
+                .map(user -> buildGiftOrder(giftCertificates, user))
                 .map(order -> mapper.map(order, Order.class))
                 .map(orderDao::create)
                 .orElseThrow(ResourceNotFoundException::new);
     }
 
-    private GiftOrder buildGiftOrder(List<GiftCertificate> giftCertificates, UserGift userGift) {
+    private GiftOrder buildGiftOrder(List<GiftCertificate> giftCertificates, User user) {
         List<GiftCertificate> certificates = giftCertificates.stream()
                 .map(GiftCertificate::getId)
                 .map(certificateService::findById)
                 .collect(Collectors.toList());
         BigDecimal cost = certificates.stream()
                 .map(GiftCertificate::getPrice)
-                .reduce(BigDecimal::add).get();
+                .reduce(BigDecimal::add).orElse(BigDecimal.valueOf(0));
         return GiftOrder.builder()
-                .user(userGift)
+                .user(mapper.map(user, UserGift.class))
                 .certificates(certificates)
                 .cost(cost)
-                .purchaseDate(ZonedDateTime.now(ZoneId.systemDefault()))
                 .build();
     }
 
@@ -76,8 +75,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<GiftOrder> findUserOrders(Long id, Pageable pageable) {
-        List<Order> ordersByUserId = orderDao.findOrdersByUserId(new SearchOrderByUserIdParams(id), pageable);
-        return ordersByUserId.stream()
+        Optional.ofNullable(userDao.findById(id))
+                .orElseThrow(ResourceNotFoundException::new);
+        return orderDao.findOrdersByUserId(new SearchOrderByUserIdParams(id), pageable).stream()
                 .map(order -> mapper.map(order, GiftOrder.class))
                 .collect(Collectors.toList());
     }

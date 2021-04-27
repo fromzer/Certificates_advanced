@@ -19,7 +19,6 @@ public class UserResource implements SimpleRepresentationModelAssembler<UserGift
     private static final String GET_ALL_USERS = "get_all_users";
     private static final String GET_MOST_POPULAR_USER_TAG = "get_most_popular_user_tag";
     private static final String GET_ORDERS = "get_user_orders";
-    private static final String MAKE_ORDER = "make_order";
     private static final String PAGE_OPTIONS = "page=1&size=20";
 
     @Override
@@ -30,7 +29,6 @@ public class UserResource implements SimpleRepresentationModelAssembler<UserGift
                 .getMostPopularUserTag(resource.getContent().getId())).withRel(GET_MOST_POPULAR_USER_TAG));
         resource.add(linkTo(methodOn(UserController.class)
                 .getUserOrders(resource.getContent().getId(), new Pageable(1, 20))).withRel(GET_ORDERS));
-        resource.add(linkTo(methodOn(UserController.class).createOrder(resource.getContent().getId(), null)).withRel(MAKE_ORDER));
     }
 
     @Override

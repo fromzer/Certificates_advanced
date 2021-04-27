@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,7 +26,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserGift findById(Long id) throws ResourceNotFoundException {
-        return modelMapper.map(userDao.findById(id), UserGift.class);
+        return modelMapper.map(Optional.ofNullable(userDao.findById(id))
+                        .orElseThrow(ResourceNotFoundException::new),
+                UserGift.class);
     }
 
     @Override

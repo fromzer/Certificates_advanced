@@ -17,25 +17,23 @@ public class SearchAndSortCertificateQuery implements QueryConstructor<SearchAnd
     public void createQuery(SearchAndSortCertificateParams params, CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicate) {
         Optional.ofNullable(params.getSort())
                 .ifPresentOrElse(
-                        v -> paramsSortIsNotEmpty(params, cb, cr, root, predicate),
+                        sort -> paramsSortIsNotEmpty(params, cb, cr, root, predicate),
                         () -> isEmptySortParams(cb, cr, root, predicate));
     }
 
     private void paramsSortIsNotEmpty(SearchAndSortCertificateParams params, CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicateSearchParams) {
-        //
         String sortColumn = params.getSort().replace(MINUS, EMPTY).trim();
         if (params.getSort().startsWith(MINUS)) {
             cr.select(root).where(cb.and(predicateSearchParams)).orderBy(cb.desc(root.get(sortColumn)));
         } else {
             cr.select(root).where(cb.and(predicateSearchParams)).orderBy(cb.asc(root.get(sortColumn)));
         }
-        //todo Unable to locate Attribute  with the the given name [qweduration] ??
     }
 
     private void isEmptySortParams(CriteriaBuilder cb, CriteriaQuery<Certificate> cr, Root<Certificate> root, Predicate predicateSearchParams) {
         Optional.ofNullable(predicateSearchParams)
                 .ifPresentOrElse(
-                        v -> cr.select(root).where(cb.and(predicateSearchParams)),
+                        params -> cr.select(root).where(cb.and(params)),
                         () -> cr.select(root).where()
                 );
     }

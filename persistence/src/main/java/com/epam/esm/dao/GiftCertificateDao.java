@@ -3,9 +3,7 @@ package com.epam.esm.dao;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
-import org.springframework.data.domain.Persistable;
 
-import java.io.Serializable;
 import java.util.List;
 
 public interface GiftCertificateDao {

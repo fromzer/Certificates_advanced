@@ -4,7 +4,6 @@ import com.epam.esm.controller.CertificateController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftTag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -12,30 +11,19 @@ import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class CertificateResource implements SimpleRepresentationModelAssembler<GiftCertificate> {
     private static final String FIND_BY_ID = "get_by_id";
-    private static final String FIND_TAG_BY_ID = "get_tag_by_id";
     private static final String FIND_ALL = "get_all";
     private static final String FIND_BY_PARAMS = "get_by_params";
-    private static final String CREATE = "create";
-    private static final String UPDATE = "update";
-    private static final String DELETE = "delete";
-    private static final String SEARCH_SORT_PAGEABLE_PARAMS = "tags=&name=&description=&sort=&page=&size=";
+    private static final String SEARCH_SORT_PAGEABLE_PARAMS = "tags=&name=&description=&sort=&page=1&size=10";
 
     @Override
     public void addLinks(EntityModel<GiftCertificate> resource) {
         resource.add(linkTo(methodOn(CertificateController.class).getCertificateById(resource.getContent().getId())).withRel(FIND_BY_ID));
-        resource.add(linkTo(methodOn(CertificateController.class).create(null)).withRel(CREATE));
-        resource.add(linkTo(methodOn(CertificateController.class).update(null, resource.getContent().getId())).withRel(UPDATE));
-        resource.add(linkTo(methodOn(CertificateController.class).delete(resource.getContent().getId())).withRel(DELETE));
         resource.add(linkTo(methodOn(CertificateController.class).getCertificatesWithParameters(null, null)).withRel(FIND_ALL));
         addTagLinks(resource);
     }

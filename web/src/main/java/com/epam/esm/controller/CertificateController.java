@@ -1,7 +1,6 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.hateoas.CertificateResource;
-import com.epam.esm.hateoas.TagResource;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.exception.CreateResourceException;
@@ -10,15 +9,18 @@ import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.validation.CertificateValidator;
-import com.epam.esm.validation.SearchAndSortOptionsValidator;
+import com.epam.esm.utils.PageableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.stream.Collectors;
 
 /**
  * Rest controller for Certificates
@@ -42,34 +43,30 @@ import java.util.stream.Collectors;
 public class CertificateController {
     private final GiftCertificateService giftCertificateService;
     private final CertificateResource certificateResource;
-    @Autowired
-    private final TagResource tagResource;
-
-    private final CertificateValidator certificateValidator;
-    private final SearchAndSortOptionsValidator optionsValidator;
+    private final Validator certificateValidator;
+    private final Validator paramsValidator;
 
     @Autowired
     public CertificateController(
             GiftCertificateService giftCertificateService,
-            CertificateValidator certificateValidator,
-            SearchAndSortOptionsValidator optionsValidator,
-            CertificateResource certificateResource,
-            TagResource tagResource) {
+            @Qualifier("certificateValidator") Validator certificateValidator,
+            @Qualifier("searchAndSortParamsValidator") Validator paramsValidator,
+            CertificateResource certificateResource) {
         this.giftCertificateService = giftCertificateService;
         this.certificateValidator = certificateValidator;
-        this.optionsValidator = optionsValidator;
+        this.paramsValidator = paramsValidator;
         this.certificateResource = certificateResource;
-        this.tagResource = tagResource;
     }
 
-//    @InitBinder
-//    protected void initBinderCreate(WebDataBinder binder) {
-//        if (binder.getTarget() instanceof GiftCertificate) {
-//            binder.addValidators(certificateValidator);
-//        } else if (binder.getTarget() instanceof SearchAndSortParams) {
-//            binder.addValidators(optionsValidator);
-//        }
-//    }
+    @InitBinder("certificate")
+    public void initCertificateBinder(WebDataBinder binder) {
+        binder.addValidators(certificateValidator);
+    }
+
+    @InitBinder("params")
+    public void initSearchParamsBinder(WebDataBinder binder) {
+        binder.addValidators(paramsValidator);
+    }
 
     /**
      * Create certificate
@@ -92,7 +89,7 @@ public class CertificateController {
      */
     @PatchMapping("/{id}")
     public ResponseEntity<GiftCertificate> update(@Valid @RequestBody GiftCertificate giftCertificate,
-                                                  @PathVariable @Min(value = 0) Long id) {
+                                                  @PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(giftCertificateService.update(giftCertificate, id));
     }
 
@@ -105,7 +102,7 @@ public class CertificateController {
      * @throws ResourceNotFoundException the resource not found exception
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable @Min(value = 0) Long id) {
+    public ResponseEntity<Object> delete(@PathVariable @Min(value = 1) Long id) {
         giftCertificateService.delete(id);
         return ResponseEntity.noContent().build();
     }
@@ -118,7 +115,7 @@ public class CertificateController {
      * @throws ResourceNotFoundException the resource not found exception
      */
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<GiftCertificate>> getCertificateById(@PathVariable @Min(value = 0) Long id) {
+    public ResponseEntity<EntityModel<GiftCertificate>> getCertificateById(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(certificateResource.toModel(giftCertificateService.findById(id)));
     }
 
@@ -130,9 +127,11 @@ public class CertificateController {
      */
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> getCertificatesWithParameters(
-            @ModelAttribute SearchAndSortCertificateParams params,
+            @Valid @ModelAttribute SearchAndSortCertificateParams params,
             @ModelAttribute Pageable pageable) {
+        Pageable pagination = PageableUtils.setDefaultValueIfEmpty(pageable);
         return ResponseEntity
-                .ok(certificateResource.toCollectionModel(giftCertificateService.findCertificateByParams(params, pageable)));
+                .ok(certificateResource.toCollectionModel(
+                        giftCertificateService.findCertificateByParams(params, pagination)));
     }
 }

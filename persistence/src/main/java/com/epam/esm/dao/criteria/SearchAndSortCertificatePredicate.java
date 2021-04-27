@@ -6,7 +6,6 @@ import com.epam.esm.entity.Tag;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.Arrays;
@@ -22,7 +21,7 @@ public class SearchAndSortCertificatePredicate implements PredicateConstructor<S
 
     @Override
     public Predicate createPredicate(SearchAndSortCertificateParams params, CriteriaBuilder cb, Root<Certificate> root) {
-        return Optional.ofNullable(params.getTag())
+        return Optional.ofNullable(params.getTags())
                 .map(tagName -> searchByTagsName(cb, root, tagName))
                 .or(() -> Optional.ofNullable(params.getName())
                         .map(name -> cb.like(root.get(NAME), PERCENT + name + PERCENT)))
@@ -32,17 +31,23 @@ public class SearchAndSortCertificatePredicate implements PredicateConstructor<S
     }
 
     private Predicate searchByTagsName(CriteriaBuilder cb, Root<Certificate> root, String tagName) {
-        Join<Certificate, Tag> tagJoin = root.join(TAGS, JoinType.INNER);
+        Predicate result;
         String[] tagsName = tagName.split(",");
-        List<Predicate> predicateList = Arrays.stream(tagsName)
-                .map(name -> {
-                    Join<Certificate, Tag> tagsJoin = root.join(TAGS, JoinType.INNER);
-                    return cb.equal(tagsJoin.get(NAME), name);
-                })
-                .collect(Collectors.toList());
-        Predicate[] predicates = new Predicate[predicateList.size()];
-        return tagsName.length > 1 ?
-                cb.and(predicateList.toArray(predicates)) :
-                cb.equal(tagJoin.get(NAME), tagName);
+        if (tagsName.length > 1) {
+            List<Predicate> predicateList = Arrays.stream(tagsName)
+                    .map(name -> joinTags(cb, root, name))
+                    .collect(Collectors.toList());
+            Predicate[] predicates = new Predicate[predicateList.size()];
+            result = cb.and(predicateList.toArray(predicates));
+        } else {
+            Join<Certificate, Tag> tagJoin = root.join(TAGS);
+            result = cb.equal(tagJoin.get(NAME), tagName);
+        }
+        return result;
+    }
+
+    private Predicate joinTags(CriteriaBuilder cb, Root<Certificate> root, String name) {
+        Join<Certificate, Tag> tagsJoin = root.join(TAGS);
+        return cb.equal(tagsJoin.get(NAME), name);
     }
 }

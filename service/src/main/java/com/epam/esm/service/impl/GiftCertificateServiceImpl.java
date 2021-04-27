@@ -1,13 +1,13 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftCertificateDAOImpl;
-import com.epam.esm.exception.NoPaginationSpecifiedException;
+import com.epam.esm.dao.impl.GiftTagDAOImpl;
+import com.epam.esm.entity.Tag;
+import com.epam.esm.exception.ExistEntityException;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.entity.Certificate;
-import com.epam.esm.exception.CreateEntityException;
 import com.epam.esm.exception.CreateResourceException;
-import com.epam.esm.exception.DeleteEntityException;
 import com.epam.esm.exception.DeleteResourceException;
 import com.epam.esm.exception.EntityRetrievalException;
 import com.epam.esm.exception.ResourceNotFoundException;
@@ -41,44 +41,54 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private final GiftCertificateDAOImpl giftCertificateDAO;
     private final ModelMapper modelMapper;
+    private final GiftTagDAOImpl tagDAO;
 
     @Autowired
-    public GiftCertificateServiceImpl(GiftCertificateDAOImpl giftCertificateDAO, ModelMapper modelMapper) {
+    public GiftCertificateServiceImpl(GiftCertificateDAOImpl giftCertificateDAO, ModelMapper modelMapper, GiftTagDAOImpl tagDAO) {
         this.giftCertificateDAO = giftCertificateDAO;
         this.modelMapper = modelMapper;
+        this.tagDAO = tagDAO;
     }
 
     @Override
     @Transactional
     public GiftCertificate update(GiftCertificate giftCertificate, Long id) throws UpdateResourceException {
+        searchExistingTag(giftCertificate);
         GiftCertificate existing = Optional.ofNullable(findById(id))
                 .map(certificate -> {
                     Set<GiftTag> tags = certificate.getTags();
                     GiftServiceUtils.copyNonNullProperties(giftCertificate, certificate);
                     certificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.systemDefault()));
-                    certificate.getTags().addAll(tags);
+                    Optional.ofNullable(tags).map(tag -> certificate.getTags().addAll(tag));
                     return certificate;
                 })
                 .orElseThrow(ResourceNotFoundException::new);
-        try {
-            Certificate modified = giftCertificateDAO.update(modelMapper.map(existing, Certificate.class));
-            return modelMapper.map(modified, GiftCertificate.class);
-        } catch (ResourceNotFoundException e) {
-            logger.error("Failed to update certificate", e);
-            throw new UpdateResourceException("Failed to update certificate", e);
-        }
+        Certificate modified = giftCertificateDAO.update(modelMapper.map(existing, Certificate.class));
+        return modelMapper.map(modified, GiftCertificate.class);
     }
 
     @Override
     @Transactional
     public Long create(GiftCertificate giftCertificate) throws CreateResourceException {
-        giftCertificate.setCreateDate(ZonedDateTime.now(ZoneId.systemDefault()));
-        giftCertificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.systemDefault()));
         try {
+            if (CollectionUtils.isNotEmpty(giftCertificate.getTags())) {
+                searchExistingTag(giftCertificate);
+            }
             return giftCertificateDAO.create(modelMapper.map(giftCertificate, Certificate.class));
-        } catch (CreateEntityException e) {
+        } catch (EntityRetrievalException e) {
             logger.error("Failed to create certificate", e);
             throw new CreateResourceException("Failed to create certificate", e);
+        }
+    }
+
+    private void searchExistingTag(GiftCertificate giftCertificate) {
+        if (CollectionUtils.isNotEmpty(giftCertificate.getTags())) {
+            for (GiftTag giftTag : giftCertificate.getTags()) {
+                Tag byName = tagDAO.findByName(giftTag.getName());
+                if (byName != null) {
+                    throw new ExistEntityException();
+                }
+            }
         }
     }
 
@@ -87,8 +97,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         try {
             Certificate byId = Optional.ofNullable(giftCertificateDAO.findById(id))
                     .orElseThrow(ResourceNotFoundException::new);
-            GiftCertificate giftCertificateById = modelMapper.map(byId, GiftCertificate.class);
-            return giftCertificateById;
+            return modelMapper.map(byId, GiftCertificate.class);
         } catch (EntityRetrievalException e) {
             logger.error("Failed to find certificate by id", e);
             throw new ResourceNotFoundException("Failed to find certificate by id", e);
@@ -106,7 +115,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public List<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException {
         List<Certificate> certificates = Optional.ofNullable(pageable)
                 .map(giftCertificateDAO::findAll)
-                .orElseThrow(NoPaginationSpecifiedException::new);
+                .orElse(new ArrayList<>());
         List<GiftCertificate> giftCertificates = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(certificates)) {
             giftCertificates = certificates.stream()
@@ -120,7 +129,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public List<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException {
         try {
             List<GiftCertificate> giftCertificates;
-            if (Stream.of(params.getTag(), params.getName(), params.getDescription(),
+            if (Stream.of(params.getTags(), params.getName(), params.getDescription(),
                     params.getSort())
                     .allMatch(Objects::isNull)) {
                 giftCertificates = findAll(pageable);

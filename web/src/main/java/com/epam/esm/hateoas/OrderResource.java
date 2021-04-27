@@ -19,8 +19,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class OrderResource implements SimpleRepresentationModelAssembler<GiftOrder> {
-    private static final String GET_BY_ID = "get_tag_by_id";
-    private static final String GET_CERTIFICATE_BY_ID = "get_certificate_by_id";
     private static final String GET_ORDER = "get_order";
     private static final String GET_ORDERS = "get_user_orders";
     private static final String PAGE_OPTIONS = "page=1&size=20";
@@ -42,19 +40,19 @@ public class OrderResource implements SimpleRepresentationModelAssembler<GiftOrd
         UserGift user = giftOrder.getUser();
         user.add(userResource.toModel(user).getLinks());
         List<GiftCertificate> certificates = giftOrder.getCertificates();
-        for (GiftCertificate cert: certificates) {
+        for (GiftCertificate cert : certificates) {
             cert.add(certificateResource.toModel(cert).getLinks());
         }
-
-        resource.getContent();
-//        certificates.stream()
-//                .forEach(certificateResource::toModel);
     }
 
     @Override
     public void addLinks(CollectionModel<EntityModel<GiftOrder>> resources) {
+        long userId = resources.getContent().stream()
+                .mapToLong(order -> order.getContent().getUser().getId())
+                .findAny()
+                .orElse(0);
         UriComponentsBuilder componentsBuilder = linkTo(methodOn(UserController.class)
-                .getUserOrders(null, null))
+                .getUserOrders(userId, null))
                 .toUriComponentsBuilder()
                 .replaceQuery(PAGE_OPTIONS);
         componentsBuilder.encode();

@@ -1,7 +1,8 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftTagDAOImpl;
-import com.epam.esm.exception.NoPaginationSpecifiedException;
+import com.epam.esm.exception.ExistEntityException;
+import com.epam.esm.exception.PaginationSpecifiedException;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.CreateEntityException;
@@ -37,10 +38,19 @@ public class GiftTagServiceImpl implements GiftTagService {
     @Transactional
     public Long create(GiftTag entity) throws CreateResourceException {
         try {
-            return tagDAO.create(modelMapper.map(entity, Tag.class));
+            isTagExist(entity);
+            Tag map = modelMapper.map(entity, Tag.class);
+            return tagDAO.create(map);
         } catch (CreateEntityException e) {
             log.error("Failed to create tag", e);
             throw new CreateResourceException("Failed to create tag", e);
+        }
+    }
+
+    private void isTagExist(GiftTag entity) {
+        Tag byName = tagDAO.findByName(entity.getName());
+        if (byName != null) {
+            throw new ExistEntityException();
         }
     }
 
@@ -79,7 +89,7 @@ public class GiftTagServiceImpl implements GiftTagService {
     public List<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException {
         List<Tag> tags = Optional.ofNullable(pageable)
                 .map(tagDAO::findAll)
-                .orElseThrow(NoPaginationSpecifiedException::new);
+                .orElseThrow(PaginationSpecifiedException::new);
         List<GiftTag> convertedAllTags = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(tags)) {
             convertedAllTags = tags.stream()

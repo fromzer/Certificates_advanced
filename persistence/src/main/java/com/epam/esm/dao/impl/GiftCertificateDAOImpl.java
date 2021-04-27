@@ -6,14 +6,12 @@ import com.epam.esm.dao.criteria.SearchAndSortCertificateQuery;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.entity.Certificate;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
 @Repository
 @Transactional
 public class GiftCertificateDAOImpl implements GiftCertificateDao {
@@ -44,7 +42,7 @@ public class GiftCertificateDAOImpl implements GiftCertificateDao {
 
     @Override
     public List<Certificate> findEntitiesByParams(SearchAndSortCertificateParams params, Pageable pageable) {
-        return giftDao.findEntityByParams(params, pageable, new SearchAndSortCertificatePredicate(), new SearchAndSortCertificateQuery());
+        return giftDao.findEntitiesByParams(params, pageable, new SearchAndSortCertificatePredicate(), new SearchAndSortCertificateQuery());
     }
 
     @Override

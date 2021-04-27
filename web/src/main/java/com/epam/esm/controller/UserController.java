@@ -1,6 +1,5 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.hateoas.GiftOrderWithoutCertificatesAndUserResource;
 import com.epam.esm.hateoas.OrderResource;
 import com.epam.esm.hateoas.TagResource;
 import com.epam.esm.hateoas.UserResource;
@@ -13,12 +12,16 @@ import com.epam.esm.model.UserGift;
 import com.epam.esm.service.GiftTagService;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.epam.esm.utils.PageableUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,23 +39,30 @@ public class UserController {
     private final UserService userService;
     private final OrderService orderService;
     private final GiftTagService tagService;
-
     private final UserResource userResource;
     private final OrderResource orderResource;
     private final TagResource tagResource;
+    private final Validator certificateValidator;
 
     public UserController(UserService userService,
                           OrderService orderService,
                           GiftTagService tagService,
                           UserResource userResource,
                           OrderResource orderResource,
-                          TagResource tagResource) {
+                          TagResource tagResource,
+                          @Qualifier("certificateValidator") Validator certificateValidator) {
         this.userService = userService;
         this.orderService = orderService;
         this.tagService = tagService;
         this.userResource = userResource;
         this.orderResource = orderResource;
         this.tagResource = tagResource;
+        this.certificateValidator = certificateValidator;
+    }
+
+    @InitBinder("certificate")
+    public void initCertificateBinder(WebDataBinder binder) {
+        binder.addValidators(certificateValidator);
     }
 
     @GetMapping("/{id}")
@@ -68,8 +78,9 @@ public class UserController {
 
     @GetMapping("/{id}/orders")
     public ResponseEntity<CollectionModel<EntityModel<GiftOrder>>> getUserOrders(@PathVariable @Min(value = 1) Long id,
-                                                                    @ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(orderResource.toCollectionModel(orderService.findUserOrders(id, pageable)));
+                                                                                 @ModelAttribute Pageable pageable) {
+        return ResponseEntity.ok(orderResource.toCollectionModel(
+                orderService.findUserOrders(id, PageableUtils.setDefaultValueIfEmpty(pageable))));
     }
 
     @GetMapping("/{id}/orders/{orderId}")
@@ -85,6 +96,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(@ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(userResource.toCollectionModel(userService.findAll(pageable)));
+        return ResponseEntity.ok(userResource.toCollectionModel(
+                userService.findAll(PageableUtils.setDefaultValueIfEmpty(pageable))));
     }
 }

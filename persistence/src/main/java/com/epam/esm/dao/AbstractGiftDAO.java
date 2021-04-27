@@ -2,13 +2,13 @@ package com.epam.esm.dao;
 
 import com.epam.esm.dao.criteria.PredicateConstructor;
 import com.epam.esm.dao.criteria.QueryConstructor;
+import com.epam.esm.exception.EntityRetrievalException;
 import com.epam.esm.model.Pageable;
-import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.model.SearchAndSortParams;
-import org.hibernate.Session;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -18,7 +18,6 @@ import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,7 +47,9 @@ public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializab
     public T createNativeQuery(String query, String param, String value) {
         return (T) getEm().createNativeQuery(query, clazz)
                 .setParameter(param, value)
-                .getSingleResult();
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -59,7 +60,11 @@ public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializab
         for (Map.Entry<String, String> entry : searchParameters) {
             nativeQuery.setParameter(entry.getKey(), entry.getValue());
         }
-        return (T) nativeQuery.getSingleResult();
+        try {
+            return (T) nativeQuery.getSingleResult();
+        } catch (NoResultException exception) {
+            throw new EntityRetrievalException(exception);
+        }
     }
 
     @Override
@@ -88,8 +93,10 @@ public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializab
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public List<T> findEntityByParams(SearchAndSortParams params, Pageable pageable,
-                                      PredicateConstructor predicateConstructor, QueryConstructor queryConstructor) {
+    public List<T> findEntitiesByParams(SearchAndSortParams params,
+                                        Pageable pageable,
+                                        PredicateConstructor predicateConstructor,
+                                        QueryConstructor queryConstructor) {
         CriteriaBuilder cb = getEm().getCriteriaBuilder();
         CriteriaQuery<T> cr = cb.createQuery(clazz);
         Root<T> root = cr.from(clazz);
@@ -98,12 +105,12 @@ public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializab
         Query query = getEm().createQuery(cr);
         query.setFirstResult((pageable.getPage() - ONE) * pageable.getSize());
         query.setMaxResults(pageable.getSize());
-        List resultList = query.getResultList();
-        return (List<T>) resultList.stream().distinct().collect(Collectors.toList());
+        List<T> resultList = query.getResultList();
+        return resultList.stream().distinct().collect(Collectors.toList());
     }
 
     @Override
     public void delete(T entity) {
-        getEm().remove(entity);
+        getEm().remove(getEm().contains(entity) ? entity : getEm().merge(entity));
     }
 }

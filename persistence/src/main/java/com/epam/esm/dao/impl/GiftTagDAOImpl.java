@@ -4,14 +4,12 @@ import com.epam.esm.dao.GiftDAO;
 import com.epam.esm.dao.GiftTagDao;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.entity.Tag;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
 @Repository
 @Transactional
 public class GiftTagDAOImpl implements GiftTagDao {
@@ -27,7 +25,7 @@ public class GiftTagDAOImpl implements GiftTagDao {
             "ORDER BY quantity DESC, sum_cost DESC " +
             "LIMIT 1 " +
             ") as tag;";
-    private static final String SQL_SELECT_FIND_NAME = "SELECT id, name FROM tag WHERE name=:name;";
+    private static final String SQL_SELECT_FIND_NAME = "SELECT id, name FROM tag WHERE name=:name";
     private static final String NAME = "name";
     private static final String USER_ID = "userId";
 

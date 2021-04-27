@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class SearchAndSortCertificateParams implements SearchAndSortParams{
-    private String tag;
+    private String tags;
     private String name;
     private String description;
     private String sort;

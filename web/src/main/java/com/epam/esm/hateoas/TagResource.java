@@ -15,16 +15,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Component
 public class TagResource implements SimpleRepresentationModelAssembler<GiftTag> {
     private static final String GET_BY_ID = "get_tag_by_id";
-    private static final String DELETE = "delete";
-    private static final String CREATE = "create";
     private static final String GET_ALL = "get_all_tags";
     private static final String PAGE_OPTIONS = "page=1&size=20";
 
     @Override
     public void addLinks(EntityModel<GiftTag> resource) {
         resource.add(linkTo(methodOn(TagController.class).getTagById(resource.getContent().getId())).withRel(GET_BY_ID));
-        resource.add(linkTo(methodOn(TagController.class).delete(resource.getContent().getId())).withRel(DELETE));
-        resource.add(linkTo(methodOn(TagController.class).create(null)).withRel(CREATE));
         resource.add(linkTo(methodOn(TagController.class).getAll(null)).withRel(GET_ALL));
     }
 

@@ -54,13 +54,8 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     @Override
-    public void delete(Order entity) {
-        giftDao.delete(entity);
-    }
-
-    @Override
     public List<Order> findOrdersByUserId(SearchOrderByUserIdParams params, Pageable pageable) {
-        return giftDao.findEntityByParams(params, pageable,
+        return giftDao.findEntitiesByParams(params, pageable,
                 new SearchOrderByUserIdPredicate(), new SearchOrderByUserIdQuery());
     }
 }

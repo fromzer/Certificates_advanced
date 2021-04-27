@@ -23,8 +23,8 @@ public interface GiftDAO<T extends Persistable<? extends Serializable>> extends 
 
     List<T> findAll(Pageable pageable);
 
-    List<T> findEntityByParams(SearchAndSortParams params, Pageable pageable,
-                               PredicateConstructor predicateConstructor, QueryConstructor queryConstructor);
+    List<T> findEntitiesByParams(SearchAndSortParams params, Pageable pageable,
+                                 PredicateConstructor predicateConstructor, QueryConstructor queryConstructor);
 
     void delete(T entity);
 }
