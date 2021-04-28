@@ -6,16 +6,57 @@ import com.epam.esm.model.SearchAndSortCertificateParams;
 
 import java.util.List;
 
+/**
+ * Base interface class for GiftCertificateDAO
+ *
+ * @author Egor Miheev
+ * @version 1.0.0
+ */
 public interface GiftCertificateDao {
-    Long create(Certificate entity);
+    /**
+     * Create certificate in DB
+     *
+     * @param certificate a certificate of business model
+     * @return entry id
+     */
+    Long create(Certificate certificate);
 
-    Certificate update(Certificate entity);
+    /**
+     * Update certificate in DB
+     *
+     * @param certificate a certificate of business model
+     * @return updated certificateDTO
+     */
+    Certificate update(Certificate certificate);
 
+    /**
+     * Find certificate in DB
+     * @param id certificate id
+     * @return certificate
+     */
     Certificate findById(Long id);
 
+    /**
+     * Find all certificates in DB
+     *
+     * @param pageable pagination
+     * @return List of certificates
+     */
     List<Certificate> findAll(Pageable pageable);
 
+    /**
+     * Find entry in table
+     *
+     * @param params   the search and sort options
+     * @param pageable pagination
+     * @return list of Certificate
+     */
     List<Certificate> findEntitiesByParams(SearchAndSortCertificateParams params, Pageable pageable);
 
-    void delete(Certificate entity);
+    /**
+     * Delete certificate in DB
+     *
+     * @param certificate
+     */
+    void delete(Certificate certificate);
 }

@@ -67,8 +67,7 @@ public class TagController {
      * Create tag
      *
      * @param tag the GiftTag
-     * @return the response entity
-     * @throws CreateResourceException the service exception
+     * @return the tag id
      */
     @PostMapping
     public ResponseEntity<Long> create(@Valid @RequestBody GiftTag tag) {
@@ -80,7 +79,6 @@ public class TagController {
      *
      * @param id the GiftTag id
      * @return the response entity
-     * @throws ResourceNotFoundException the resource not found exception
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<GiftTag> delete(@PathVariable @Min(value = 1) Long id) {
@@ -93,7 +91,6 @@ public class TagController {
      *
      * @param id the GiftTag id
      * @return the tag
-     * @throws ResourceNotFoundException the resource not found exception
      */
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<GiftTag>> getTagById(@PathVariable @Min(value = 1) Long id) {
@@ -103,8 +100,8 @@ public class TagController {
     /**
      * Get all tags
      *
+     * @param pageable the pagination
      * @return List of GiftTags
-     * @throws ResourceNotFoundException the resource not found exception
      */
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<GiftTag>>> getAll(@Valid @ModelAttribute Pageable pageable) {

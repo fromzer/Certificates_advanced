@@ -65,7 +65,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = {IllegalArgumentException.class, PaginationSpecifiedException.class})
+    @ExceptionHandler(value = IllegalArgumentException.class)
     protected ResponseEntity<ErrorMessage> handleInvalidParamsException(Locale locale) {
         String msg = messageSource.getMessage(INVALID_PARAMS_MESSAGE, null, locale);
         ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), msg, "40011");

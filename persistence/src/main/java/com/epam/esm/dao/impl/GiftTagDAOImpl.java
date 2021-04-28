@@ -39,13 +39,13 @@ public class GiftTagDAOImpl implements GiftTagDao {
 
     @Override
     @Transactional
-    public Long create(Tag entity) {
-        return giftDao.create(entity);
+    public Long create(Tag tag) {
+        return giftDao.create(tag);
     }
 
     @Override
-    public void delete(Tag entity) {
-        giftDao.delete(entity);
+    public void delete(Tag tag) {
+        giftDao.delete(tag);
     }
 
     @Override

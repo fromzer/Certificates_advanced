@@ -9,10 +9,40 @@ import com.epam.esm.model.GiftOrder;
 
 import java.util.List;
 
+/**
+ * Base interface for Order Service
+ *
+ * @author Egor Miheev
+ * @version 1.0.0
+ */
 public interface OrderService {
-    Long createOrder(Long id, List<GiftCertificate> giftCertificates) throws CreateResourceException;
+    /**
+     * Create order
+     *
+     * @param userId           user id
+     * @param giftCertificates list of certificates
+     * @return order id
+     * @throws CreateResourceException if error is occurred during SQL command execution
+     */
+    Long createOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException;
 
+    /**
+     * Get user order
+     *
+     * @param orderId order id
+     * @param userId  user id
+     * @return cost and timestamp of a purchase
+     * @throws ResourceNotFoundException if fail to retrieve data from DB
+     */
     GiftOrderWithoutCertificatesAndUser findUserOrderInfo(Long orderId, Long userId) throws ResourceNotFoundException;
 
-    List<GiftOrder> findUserOrders(Long id, Pageable pageable);
+    /**
+     * Get user orders
+     *
+     * @param id       user id
+     * @param pageable pagination
+     * @return list of user orders
+     * @throws ResourceNotFoundException if fail to retrieve data from DB
+     */
+    List<GiftOrder> findUserOrders(Long id, Pageable pageable) throws ResourceNotFoundException;
 }

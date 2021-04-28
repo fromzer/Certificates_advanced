@@ -11,7 +11,7 @@ import com.epam.esm.model.GiftCertificate;
 import java.util.List;
 
 /**
- * Base interface for Certificates
+ * Base interface for Certificate Service
  *
  * @author Egor Miheev
  * @version 1.0.0
@@ -44,6 +44,7 @@ public interface GiftCertificateService {
     /**
      * Find all entities
      *
+     * @param pageable pagination
      * @return List of entities
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
@@ -52,16 +53,17 @@ public interface GiftCertificateService {
     /**
      * Update entity
      *
-     * @param certificateDTO an DTO of business model
+     * @param giftCertificate an DTO of business model
      * @return updated GiftCertificate
      * @throws UpdateResourceException if fail to update data
      */
-    GiftCertificate update(GiftCertificate certificateDTO, Long id) throws UpdateResourceException;
+    GiftCertificate update(GiftCertificate giftCertificate, Long id) throws UpdateResourceException;
 
     /**
      * Find entity
      *
-     * @param params the search options
+     * @param params   the search options
+     * @param pageable pagination
      * @return list of GiftCertificates
      * @throws ResourceNotFoundException if fail to retrieve data
      */

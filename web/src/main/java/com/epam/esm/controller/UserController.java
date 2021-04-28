@@ -33,6 +33,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
 
+/**
+ * Rest controller for Users
+ *
+ * @author Egor Miheev
+ * @version 1.0.0
+ */
 @RestController
 @RequestMapping(value = "/users", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class UserController {
@@ -74,17 +80,37 @@ public class UserController {
         binder.addValidators(pageableValidator);
     }
 
+    /**
+     * Get user by id
+     *
+     * @param id user id
+     * @return user
+     */
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<UserGift>> getUserById(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(userResource.toModel(userService.findById(id)));
     }
 
+    /**
+     * Create user order
+     *
+     * @param id               user id
+     * @param giftCertificates list of certificates
+     * @return order id
+     */
     @PostMapping("/{id}/orders")
     public ResponseEntity<Long> createOrder(@PathVariable @Min(value = 1) Long id,
                                             @Valid @RequestBody List<GiftCertificate> giftCertificates) {
         return ResponseEntity.ok(orderService.createOrder(id, giftCertificates));
     }
 
+    /**
+     * Get user orders
+     *
+     * @param id       user id
+     * @param pageable pagination
+     * @return list of user orders
+     */
     @GetMapping("/{id}/orders")
     public ResponseEntity<CollectionModel<EntityModel<GiftOrder>>> getUserOrders(@PathVariable @Min(value = 1) Long id,
                                                                                  @Valid @ModelAttribute Pageable pageable) {
@@ -92,17 +118,36 @@ public class UserController {
                 orderService.findUserOrders(id, pageable)));
     }
 
+    /**
+     * Get user order
+     *
+     * @param id      user id
+     * @param orderId order id
+     * @return user order
+     */
     @GetMapping("/{id}/orders/{orderId}")
     public ResponseEntity<GiftOrderWithoutCertificatesAndUser> getUserOrder(@PathVariable @Min(value = 1) Long id,
                                                                             @PathVariable @Min(value = 1) Long orderId) {
         return ResponseEntity.ok(orderService.findUserOrderInfo(orderId, id));
     }
 
+    /**
+     * Get the most widely used tag of a user with the highest cost of all orders
+     *
+     * @param id user id
+     * @return tag
+     */
     @GetMapping("/{id}/tag")
     public ResponseEntity<EntityModel<GiftTag>> getMostPopularUserTag(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(tagResource.toModel(tagService.findMostPopularUserTag(id)));
     }
 
+    /**
+     * Get all users
+     *
+     * @param pageable pagination
+     * @return list of users
+     */
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(@Valid @ModelAttribute Pageable pageable) {
         return ResponseEntity.ok(userResource.toCollectionModel(

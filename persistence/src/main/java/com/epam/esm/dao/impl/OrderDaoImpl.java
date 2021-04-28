@@ -31,8 +31,8 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     @Transactional
-    public Long create(Order entity) {
-        return giftDao.create(entity);
+    public Long create(Order order) {
+        return giftDao.create(order);
     }
 
     @Override

@@ -80,7 +80,6 @@ public class CertificateController {
      *
      * @param giftCertificate the certificate
      * @return new certificate's id
-     * @throws CreateResourceException the service exception
      */
     @PostMapping
     public ResponseEntity<Long> create(@Valid @RequestBody GiftCertificate giftCertificate) {
@@ -92,7 +91,6 @@ public class CertificateController {
      *
      * @param giftCertificate the certificate and optionally tags
      * @return certificate and tags
-     * @throws UpdateResourceException the service exception
      */
     @PatchMapping("/{id}")
     public ResponseEntity<GiftCertificate> update(@Valid @RequestBody GiftCertificate giftCertificate,
@@ -105,8 +103,6 @@ public class CertificateController {
      *
      * @param id the certificate id
      * @return response entity
-     * @throws DeleteResourceException   the service exception
-     * @throws ResourceNotFoundException the resource not found exception
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable @Min(value = 1) Long id) {
@@ -117,9 +113,8 @@ public class CertificateController {
     /**
      * Get certificate by id
      *
-     * @param id the GiftCertificate id
-     * @return the giftTag
-     * @throws ResourceNotFoundException the resource not found exception
+     * @param id the certificate id
+     * @return the certificate
      */
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<GiftCertificate>> getCertificateById(@PathVariable @Min(value = 1) Long id) {
@@ -130,7 +125,8 @@ public class CertificateController {
      * Get certificates by parameters
      *
      * @param params the search and sort params
-     * @return list of giftCertificate
+     * @param pageable the pagination
+     * @return list of certificates
      */
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> getCertificatesWithParameters(

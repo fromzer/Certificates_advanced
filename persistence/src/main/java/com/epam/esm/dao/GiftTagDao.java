@@ -7,16 +7,57 @@ import org.springframework.data.domain.Persistable;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Base interface class for GiftTagDAO
+ *
+ * @author Egor Miheev
+ * @version 1.0.0
+ */
 public interface GiftTagDao {
-    Long create(Tag entity);
+    /**
+     * Create tag in DB
+     *
+     * @param tag a tag of business model
+     * @return entry id
+     */
+    Long create(Tag tag);
 
+    /**
+     * Find tag by id in DB
+     *
+     * @param id tag id
+     * @return tag
+     */
     Tag findById(Long id);
 
+    /**
+     * Find tag by name in DB
+     *
+     * @param name tag name
+     * @return tag
+     */
     Tag findByName(String name);
 
+    /**
+     * Find the most popular user tag
+     *
+     * @param userId user id
+     * @return tag
+     */
     Tag findMostPopularUserTag(Long userId);
 
+    /**
+     * Find all tags in DB
+     *
+     * @param pageable pagination
+     * @return list of tags
+     */
     List<Tag> findAll(Pageable pageable);
 
-    void delete(Tag entity);
+    /**
+     * Delete tag in DB
+     *
+     * @param tag
+     */
+    void delete(Tag tag);
 }

@@ -10,7 +10,7 @@ import com.epam.esm.model.Pageable;
 import java.util.List;
 
 /**
- * Base interface for Tags
+ * Base interface for Tag Service
  *
  * @author Egor Miheev
  * @version 1.0.0
@@ -53,10 +53,18 @@ public interface GiftTagService {
     /**
      * Find all entities
      *
+     * @param pageable pagination
      * @return List of entities
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
     List<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException;
 
+    /**
+     * Get the most popular user tag
+     *
+     * @param userId user id
+     * @return tag
+     * @throws ResourceNotFoundException if fail to retrieve data from DB
+     */
     GiftTag findMostPopularUserTag(Long userId) throws ResourceNotFoundException;
 }

@@ -93,7 +93,7 @@ class OrderServiceImplTest {
         List<GiftCertificate> giftCertificates = certificates.stream()
                 .map(cert -> modelMapper.map(cert, GiftCertificate.class))
                 .collect(Collectors.toList());
-        assertEquals(order.getId(), orderService.createOrder(order.getId(), giftCertificates));
+        assertEquals(order.getId(), orderService.createOrder(user.getId(), giftCertificates));
     }
 
     @Test

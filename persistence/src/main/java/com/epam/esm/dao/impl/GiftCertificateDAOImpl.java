@@ -26,13 +26,13 @@ public class GiftCertificateDAOImpl implements GiftCertificateDao {
 
     @Override
     @Transactional
-    public Long create(Certificate entity) {
-        return giftDao.create(entity);
+    public Long create(Certificate certificate) {
+        return giftDao.create(certificate);
     }
 
     @Override
-    public void delete(Certificate entity) {
-        giftDao.delete(entity);
+    public void delete(Certificate certificate) {
+        giftDao.delete(certificate);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class GiftCertificateDAOImpl implements GiftCertificateDao {
 
     @Override
     @Transactional
-    public Certificate update(Certificate entity) {
-        return giftDao.update(entity);
+    public Certificate update(Certificate certificate) {
+        return giftDao.update(certificate);
     }
 }

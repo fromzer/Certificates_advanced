@@ -43,8 +43,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public Long createOrder(Long id, List<GiftCertificate> giftCertificates) throws CreateResourceException {
-        return Optional.ofNullable(userDao.findById(id))
+    public Long createOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException {
+        return Optional.ofNullable(userDao.findById(userId))
                 .map(user -> buildGiftOrder(giftCertificates, user))
                 .map(order -> mapper.map(order, Order.class))
                 .map(orderDao::create)
