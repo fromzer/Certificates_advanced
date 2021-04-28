@@ -6,7 +6,6 @@ import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftTag;
 import com.epam.esm.service.GiftTagService;
-import com.epam.esm.utils.PageableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
@@ -41,19 +40,27 @@ public class TagController {
     private final GiftTagService tagService;
     private final TagResource tagResource;
     private final Validator tagValidator;
+    private final Validator pageableValidator;
 
     @Autowired
     public TagController(GiftTagService tagService,
                          TagResource tagResource,
-                         @Qualifier("tagValidator") Validator tagValidator) {
+                         @Qualifier("tagValidator") Validator tagValidator,
+                         @Qualifier("pageableValidator") Validator pageableValidator) {
         this.tagService = tagService;
         this.tagResource = tagResource;
         this.tagValidator = tagValidator;
+        this.pageableValidator = pageableValidator;
     }
 
     @InitBinder("tag")
     public void initTagBinder(WebDataBinder binder) {
         binder.addValidators(tagValidator);
+    }
+
+    @InitBinder("pageable")
+    public void initPageableBinder(WebDataBinder binder) {
+        binder.addValidators(pageableValidator);
     }
 
     /**
@@ -100,10 +107,9 @@ public class TagController {
      * @throws ResourceNotFoundException the resource not found exception
      */
     @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<GiftTag>>> getAll(@ModelAttribute Pageable pageable) {
+    public ResponseEntity<CollectionModel<EntityModel<GiftTag>>> getAll(@Valid @ModelAttribute Pageable pageable) {
         return ResponseEntity.ok(
                 tagResource.toCollectionModel(
-                        tagService.findAll(
-                                PageableUtils.setDefaultValueIfEmpty(pageable))));
+                        tagService.findAll(pageable)));
     }
 }

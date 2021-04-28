@@ -12,7 +12,7 @@ import com.epam.esm.model.UserGift;
 import com.epam.esm.service.GiftTagService;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
-import com.epam.esm.utils.PageableUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -43,14 +43,17 @@ public class UserController {
     private final OrderResource orderResource;
     private final TagResource tagResource;
     private final Validator certificateValidator;
+    private final Validator pageableValidator;
 
+    @Autowired
     public UserController(UserService userService,
                           OrderService orderService,
                           GiftTagService tagService,
                           UserResource userResource,
                           OrderResource orderResource,
                           TagResource tagResource,
-                          @Qualifier("certificateValidator") Validator certificateValidator) {
+                          @Qualifier("certificateValidator") Validator certificateValidator,
+                          @Qualifier("pageableValidator") Validator pageableValidator) {
         this.userService = userService;
         this.orderService = orderService;
         this.tagService = tagService;
@@ -58,11 +61,17 @@ public class UserController {
         this.orderResource = orderResource;
         this.tagResource = tagResource;
         this.certificateValidator = certificateValidator;
+        this.pageableValidator = pageableValidator;
     }
 
     @InitBinder("certificate")
     public void initCertificateBinder(WebDataBinder binder) {
         binder.addValidators(certificateValidator);
+    }
+
+    @InitBinder("pageable")
+    public void initPageableBinder(WebDataBinder binder) {
+        binder.addValidators(pageableValidator);
     }
 
     @GetMapping("/{id}")
@@ -78,9 +87,9 @@ public class UserController {
 
     @GetMapping("/{id}/orders")
     public ResponseEntity<CollectionModel<EntityModel<GiftOrder>>> getUserOrders(@PathVariable @Min(value = 1) Long id,
-                                                                                 @ModelAttribute Pageable pageable) {
+                                                                                 @Valid @ModelAttribute Pageable pageable) {
         return ResponseEntity.ok(orderResource.toCollectionModel(
-                orderService.findUserOrders(id, PageableUtils.setDefaultValueIfEmpty(pageable))));
+                orderService.findUserOrders(id, pageable)));
     }
 
     @GetMapping("/{id}/orders/{orderId}")
@@ -95,8 +104,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(@ModelAttribute Pageable pageable) {
+    public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(@Valid @ModelAttribute Pageable pageable) {
         return ResponseEntity.ok(userResource.toCollectionModel(
-                userService.findAll(PageableUtils.setDefaultValueIfEmpty(pageable))));
+                userService.findAll(pageable)));
     }
 }

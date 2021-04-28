@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 
 public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializable>> implements GiftDAO<T> {
-    private static final int ONE = 1;
     private Class<T> clazz;
 
     @PersistenceContext
@@ -86,7 +85,7 @@ public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializab
         Root<T> root = cr.from(clazz);
         cr.select(root);
         Query query = getEm().createQuery(cr);
-        query.setFirstResult((pageable.getPage() - ONE) * pageable.getSize());
+        query.setFirstResult(pageable.getOffset());
         query.setMaxResults(pageable.getSize());
         return query.getResultList();
     }
@@ -103,7 +102,7 @@ public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializab
         Predicate predicateSearchParams = predicateConstructor.createPredicate(params, cb, root);
         queryConstructor.createQuery(params, cb, cr, root, predicateSearchParams);
         Query query = getEm().createQuery(cr);
-        query.setFirstResult((pageable.getPage() - ONE) * pageable.getSize());
+        query.setFirstResult(pageable.getOffset());
         query.setMaxResults(pageable.getSize());
         List<T> resultList = query.getResultList();
         return resultList.stream().distinct().collect(Collectors.toList());

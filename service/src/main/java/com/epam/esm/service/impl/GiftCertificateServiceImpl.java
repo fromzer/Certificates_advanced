@@ -113,9 +113,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public List<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException {
-        List<Certificate> certificates = Optional.ofNullable(pageable)
-                .map(giftCertificateDAO::findAll)
-                .orElse(new ArrayList<>());
+        List<Certificate> certificates = giftCertificateDAO.findAll(pageable);
         List<GiftCertificate> giftCertificates = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(certificates)) {
             giftCertificates = certificates.stream()

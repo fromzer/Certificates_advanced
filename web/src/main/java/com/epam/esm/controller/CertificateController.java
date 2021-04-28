@@ -9,7 +9,6 @@ import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.utils.PageableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
@@ -45,17 +44,20 @@ public class CertificateController {
     private final CertificateResource certificateResource;
     private final Validator certificateValidator;
     private final Validator paramsValidator;
+    private final Validator pageableValidator;
 
     @Autowired
     public CertificateController(
             GiftCertificateService giftCertificateService,
             @Qualifier("certificateValidator") Validator certificateValidator,
             @Qualifier("searchAndSortParamsValidator") Validator paramsValidator,
-            CertificateResource certificateResource) {
+            CertificateResource certificateResource,
+            @Qualifier("pageableValidator") Validator pageableValidator) {
         this.giftCertificateService = giftCertificateService;
         this.certificateValidator = certificateValidator;
         this.paramsValidator = paramsValidator;
         this.certificateResource = certificateResource;
+        this.pageableValidator = pageableValidator;
     }
 
     @InitBinder("certificate")
@@ -66,6 +68,11 @@ public class CertificateController {
     @InitBinder("params")
     public void initSearchParamsBinder(WebDataBinder binder) {
         binder.addValidators(paramsValidator);
+    }
+
+    @InitBinder("pageable")
+    public void initPageableBinder(WebDataBinder binder) {
+        binder.addValidators(pageableValidator);
     }
 
     /**
@@ -128,10 +135,9 @@ public class CertificateController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> getCertificatesWithParameters(
             @Valid @ModelAttribute SearchAndSortCertificateParams params,
-            @ModelAttribute Pageable pageable) {
-        Pageable pagination = PageableUtils.setDefaultValueIfEmpty(pageable);
+            @Valid @ModelAttribute Pageable pageable) {
         return ResponseEntity
                 .ok(certificateResource.toCollectionModel(
-                        giftCertificateService.findCertificateByParams(params, pagination)));
+                        giftCertificateService.findCertificateByParams(params, pageable)));
     }
 }

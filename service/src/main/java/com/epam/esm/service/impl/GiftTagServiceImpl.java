@@ -2,7 +2,6 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.impl.GiftTagDAOImpl;
 import com.epam.esm.exception.ExistEntityException;
-import com.epam.esm.exception.PaginationSpecifiedException;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.CreateEntityException;
@@ -87,9 +86,7 @@ public class GiftTagServiceImpl implements GiftTagService {
 
     @Override
     public List<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException {
-        List<Tag> tags = Optional.ofNullable(pageable)
-                .map(tagDAO::findAll)
-                .orElseThrow(PaginationSpecifiedException::new);
+        List<Tag> tags = tagDAO.findAll(pageable);
         List<GiftTag> convertedAllTags = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(tags)) {
             convertedAllTags = tags.stream()
