@@ -9,14 +9,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
-    implementation group: 'mysql', name: 'mysql-connector-java', version: mysqlConnectorVersion
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: commonsCollectionsVers
     implementation group: 'org.modelmapper', name: 'modelmapper', version: modelmapperVersion
-    testCompile 'org.junit.jupiter:junit-jupiter-api:5.+'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: mockitoVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 }
 
 jar {

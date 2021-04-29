@@ -82,6 +82,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     private void searchExistingTag(GiftCertificate giftCertificate) {
+//        Stream.ofNullable(giftCertificate.getTags())
+//                .map(giftTags -> giftTags.stream()
+//                        .map(tag -> tagDAO.findByName(tag.getName()))
+//                        .anyMatch(tag -> tag != null)
+//                )
+//                .findAny()
+//                .get();
         if (CollectionUtils.isNotEmpty(giftCertificate.getTags())) {
             for (GiftTag giftTag : giftCertificate.getTags()) {
                 Tag byName = tagDAO.findByName(giftTag.getName());

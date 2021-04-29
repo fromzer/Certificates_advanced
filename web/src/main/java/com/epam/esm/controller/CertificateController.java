@@ -3,10 +3,6 @@ package com.epam.esm.controller;
 import com.epam.esm.hateoas.CertificateResource;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
-import com.epam.esm.exception.CreateResourceException;
-import com.epam.esm.exception.DeleteResourceException;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,7 +120,7 @@ public class CertificateController {
     /**
      * Get certificates by parameters
      *
-     * @param params the search and sort params
+     * @param params   the search and sort params
      * @param pageable the pagination
      * @return list of certificates
      */

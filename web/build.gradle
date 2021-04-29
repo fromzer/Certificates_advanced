@@ -5,13 +5,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: jxServletApiVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatatypeVersion
     implementation group: 'javax.validation', name: 'validation-api', version: jxValidationApiVersion
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testCompile 'org.junit.jupiter:junit-jupiter-api:5.+'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 bootRun {
