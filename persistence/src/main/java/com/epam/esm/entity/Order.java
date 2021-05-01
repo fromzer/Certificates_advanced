@@ -34,6 +34,8 @@ public class Order extends PersistentObject implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "cost")
     private BigDecimal cost;
 
     @Column(name = "purchase_date")

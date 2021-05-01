@@ -43,7 +43,7 @@ class GiftTagServiceImplTest {
     void createTag() {
         pageable = new Pageable(1, 20);
         modelMapper = new ModelMapper();
-        giftTagService = new GiftTagServiceImpl(tagDAO, modelMapper);
+        giftTagService = new GiftTagServiceImpl(tagDAO);
         correctTag = new Tag(1L, "name");
         correctGiftTag = new GiftTag(1L, "name");
     }
@@ -95,13 +95,6 @@ class GiftTagServiceImplTest {
         assertThrows(EntityRetrievalException.class, () -> giftTagService.delete(correctGiftTag.getId()));
     }
 
-//    @Test
-//    void shouldDeleteTag() throws DeleteEntityException {
-//        when(tagDAO.findById(anyLong())).thenReturn(correctTag);
-//        giftTagService.delete(correctGiftTag.getId());
-//        verify(tagDAO, times(1)).delete(modelMapper.map(correctGiftTag.getId(), Tag.class));
-//    }
-
     @Test
     void shouldFindAllTags() throws EntityRetrievalException, ResourceNotFoundException {
         List<Tag> tagDTOList = new ArrayList<>();
@@ -109,12 +102,4 @@ class GiftTagServiceImplTest {
         when(tagDAO.findAll(pageable)).thenReturn(tagDTOList);
         assertEquals(1, giftTagService.findAll(pageable).size());
     }
-
-//    @Test
-//    void shouldNotFindAllTags() throws EntityRetrievalException, ResourceNotFoundException {
-//        when(tagDAO.findAll(pageable)).thenReturn(null);
-//        ArrayList<GiftTag> excepted = new ArrayList<>();
-//        List<GiftTag> actual = giftTagService.findAll(pageable);
-//        assertEquals(excepted, actual);
-//    }
 }

@@ -34,7 +34,7 @@ import javax.validation.constraints.Min;
  * @version 1.0.0
  */
 @RestController
-@RequestMapping(value = "/certificates", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/api/v1/certificates", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class CertificateController {
     private final GiftCertificateService giftCertificateService;
     private final CertificateResource certificateResource;
@@ -101,7 +101,7 @@ public class CertificateController {
      * @return response entity
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable @Min(value = 1) Long id) {
+    public ResponseEntity<Void> delete(@PathVariable @Min(value = 1) Long id) {
         giftCertificateService.delete(id);
         return ResponseEntity.noContent().build();
     }

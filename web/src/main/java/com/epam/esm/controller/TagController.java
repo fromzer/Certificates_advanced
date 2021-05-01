@@ -1,10 +1,8 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.hateoas.TagResource;
-import com.epam.esm.model.Pageable;
-import com.epam.esm.exception.CreateResourceException;
-import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftTag;
+import com.epam.esm.model.Pageable;
 import com.epam.esm.service.GiftTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +32,7 @@ import javax.validation.constraints.Min;
  * @version 1.0.0
  */
 @RestController
-@RequestMapping(value = "/tags", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/api/v1/tags", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class TagController {
 
     private final GiftTagService tagService;
@@ -81,7 +79,7 @@ public class TagController {
      * @return the response entity
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<GiftTag> delete(@PathVariable @Min(value = 1) Long id) {
+    public ResponseEntity<Void> delete(@PathVariable @Min(value = 1) Long id) {
         tagService.delete(id);
         return ResponseEntity.noContent().build();
     }

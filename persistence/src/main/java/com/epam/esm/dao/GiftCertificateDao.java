@@ -31,6 +31,7 @@ public interface GiftCertificateDao {
 
     /**
      * Find certificate in DB
+     *
      * @param id certificate id
      * @return certificate
      */
@@ -56,7 +57,7 @@ public interface GiftCertificateDao {
     /**
      * Delete certificate in DB
      *
-     * @param certificate
+     * @param certificate the certificate
      */
     void delete(Certificate certificate);
 }

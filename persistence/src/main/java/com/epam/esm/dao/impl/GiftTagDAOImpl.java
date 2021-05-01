@@ -2,8 +2,8 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.GiftDAO;
 import com.epam.esm.dao.GiftTagDao;
-import com.epam.esm.model.Pageable;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.model.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

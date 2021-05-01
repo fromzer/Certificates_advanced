@@ -58,13 +58,4 @@ public interface GiftTagService {
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
     List<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException;
-
-    /**
-     * Get the most popular user tag
-     *
-     * @param userId user id
-     * @return tag
-     * @throws ResourceNotFoundException if fail to retrieve data from DB
-     */
-    GiftTag findMostPopularUserTag(Long userId) throws ResourceNotFoundException;
 }

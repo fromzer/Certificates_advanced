@@ -26,6 +26,8 @@ public class User extends PersistentObject implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "login")
     private String login;
 
     @Column(name = "first_name")

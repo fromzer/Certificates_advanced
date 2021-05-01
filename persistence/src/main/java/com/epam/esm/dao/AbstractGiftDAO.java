@@ -110,6 +110,7 @@ public abstract class AbstractGiftDAO<T extends Persistable<? extends Serializab
 
     @Override
     public void delete(T entity) {
-        getEm().remove(getEm().contains(entity) ? entity : getEm().merge(entity));
+        T t = getEm().contains(entity) ? entity : getEm().merge(entity);
+        getEm().remove(t); //
     }
 }

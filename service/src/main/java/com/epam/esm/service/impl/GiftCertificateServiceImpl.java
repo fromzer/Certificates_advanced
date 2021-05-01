@@ -1,7 +1,7 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.impl.GiftCertificateDAOImpl;
-import com.epam.esm.dao.impl.GiftTagDAOImpl;
+import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.GiftTagDao;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ExistEntityException;
 import com.epam.esm.model.Pageable;
@@ -38,15 +38,15 @@ import java.util.stream.Stream;
 @Transactional
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private static final Logger logger = LoggerFactory.getLogger(GiftCertificateServiceImpl.class);
+    private final static String ZONE = "+03:00";
 
-    private final GiftCertificateDAOImpl giftCertificateDAO;
-    private final ModelMapper modelMapper;
-    private final GiftTagDAOImpl tagDAO;
+    private final GiftCertificateDao giftCertificateDAO;
+    private final GiftTagDao tagDAO;
+    private ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
-    public GiftCertificateServiceImpl(GiftCertificateDAOImpl giftCertificateDAO, ModelMapper modelMapper, GiftTagDAOImpl tagDAO) {
+    public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDAO, GiftTagDao tagDAO) {
         this.giftCertificateDAO = giftCertificateDAO;
-        this.modelMapper = modelMapper;
         this.tagDAO = tagDAO;
     }
 
@@ -58,8 +58,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                 .map(certificate -> {
                     Set<GiftTag> tags = certificate.getTags();
                     GiftServiceUtils.copyNonNullProperties(giftCertificate, certificate);
-                    certificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.systemDefault()));
-                    Optional.ofNullable(tags).map(tag -> certificate.getTags().addAll(tag));
+                    certificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.of(ZONE)));
+                    Optional.ofNullable(tags)
+                            .map(previousTags -> certificate.getTags().addAll(previousTags));
                     return certificate;
                 })
                 .orElseThrow(ResourceNotFoundException::new);
@@ -78,24 +79,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         } catch (EntityRetrievalException e) {
             logger.error("Failed to create certificate", e);
             throw new CreateResourceException("Failed to create certificate", e);
-        }
-    }
-
-    private void searchExistingTag(GiftCertificate giftCertificate) {
-//        Stream.ofNullable(giftCertificate.getTags())
-//                .map(giftTags -> giftTags.stream()
-//                        .map(tag -> tagDAO.findByName(tag.getName()))
-//                        .anyMatch(tag -> tag != null)
-//                )
-//                .findAny()
-//                .get();
-        if (CollectionUtils.isNotEmpty(giftCertificate.getTags())) {
-            for (GiftTag giftTag : giftCertificate.getTags()) {
-                Tag byName = tagDAO.findByName(giftTag.getName());
-                if (byName != null) {
-                    throw new ExistEntityException();
-                }
-            }
         }
     }
 
@@ -134,9 +117,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public List<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException {
         try {
             List<GiftCertificate> giftCertificates;
-            if (Stream.of(params.getTags(), params.getName(), params.getDescription(),
-                    params.getSort())
-                    .allMatch(Objects::isNull)) {
+            if (isAllParamsEmpty(params)) {
                 giftCertificates = findAll(pageable);
             } else {
                 giftCertificates = giftCertificateDAO
@@ -151,4 +132,20 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         }
     }
 
+    private void searchExistingTag(GiftCertificate giftCertificate) {
+        if (CollectionUtils.isNotEmpty(giftCertificate.getTags())) {
+            for (GiftTag giftTag : giftCertificate.getTags()) {
+                Tag byName = tagDAO.findByName(giftTag.getName());
+                if (byName != null) {
+                    throw new ExistEntityException();
+                }
+            }
+        }
+    }
+
+    private boolean isAllParamsEmpty(SearchAndSortCertificateParams params) {
+        return Stream.of(params.getTags(), params.getName(), params.getDescription(),
+                params.getSort())
+                .allMatch(Objects::isNull);
+    }
 }

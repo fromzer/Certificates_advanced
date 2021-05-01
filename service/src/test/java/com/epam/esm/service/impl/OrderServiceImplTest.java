@@ -55,8 +55,8 @@ class OrderServiceImplTest {
     void setUp() {
         pageable = new Pageable(1, 10);
         modelMapper = new ModelMapper();
-        certificateService = new GiftCertificateServiceImpl(certificateDAO, modelMapper, tagDAO);
-        orderService = new OrderServiceImpl(orderDao, modelMapper, certificateService, userDao);
+        certificateService = new GiftCertificateServiceImpl(certificateDAO, tagDAO);
+        orderService = new OrderServiceImpl(orderDao, certificateService, userDao);
         user = User.builder()
                 .id(1l)
                 .login("alex")
@@ -94,20 +94,5 @@ class OrderServiceImplTest {
                 .map(cert -> modelMapper.map(cert, GiftCertificate.class))
                 .collect(Collectors.toList());
         assertEquals(order.getId(), orderService.createOrder(user.getId(), giftCertificates));
-    }
-
-    @Test
-    void shouldFindUserOrderInfo() {
-        when(orderDao.findByUserIdAndOrderId(any(), any())).thenReturn(order);
-        GiftOrderWithoutCertificatesAndUser actual = orderService.findUserOrderInfo(order.getId(), user.getId());
-        assertEquals(order.getCost(), actual.getCost());
-    }
-
-    @Test
-    void shouldFindUserOrders() {
-        when(userDao.findById(any())).thenReturn(user);
-        when(orderDao.findOrdersByUserId(any(), any())).thenReturn(orders);
-        List<GiftOrder> actual = orderService.findUserOrders(user.getId(), pageable);
-        assertEquals(orders.get(0).getId(), actual.get(0).getId());
     }
 }

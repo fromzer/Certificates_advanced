@@ -61,7 +61,7 @@ class GiftCertificateServiceImplTest {
     @BeforeEach
     void createCertificate() {
         modelMapper = new ModelMapper();
-        giftCertificateService = new GiftCertificateServiceImpl(certificateDAO, modelMapper, tagDAO);
+        giftCertificateService = new GiftCertificateServiceImpl(certificateDAO, tagDAO);
         pageable = new Pageable(1, 20);
         correctCertificate = Certificate.builder()
                 .id(1l)
@@ -98,27 +98,6 @@ class GiftCertificateServiceImplTest {
         GiftCertificate actual = giftCertificateService.update(giftCertificate, giftCertificate.getId());
         assertEquals(certificate.getName(), actual.getName());
     }
-
-//    @Test
-//    void shouldUpdateNameAndDescription() throws EntityRetrievalException, UpdateEntityException, UpdateResourceException {
-//        GiftCertificate giftCertificate = GiftCertificate.builder()
-//                .id(1l)
-//                .name("new NAME")
-//                .description("car")
-//                .tags(new HashSet<GiftTag>(GiftTag.builder().build()))
-//                .build();
-//        Certificate certificateDTO = Certificate.builder()
-//                .id(1l)
-//                .name("new NAME")
-//                .description("car")
-//                .price(BigDecimal.valueOf(12.13))
-//                .duration(1)
-//                .build();
-//        when(certificateDAO.findById(1L)).thenReturn(certificateDTO);
-//        when(certificateDAO.update(any())).thenReturn(certificateDTO);
-//        GiftCertificate actual = giftCertificateService.update(giftCertificate, giftCertificate.getId());
-//        assertEquals(certificateDTO.getDescription(), actual.getDescription());
-//    }
 
     @Test
     void shouldNotUpdateCertificate() throws EntityRetrievalException, UpdateEntityException, UpdateResourceException {

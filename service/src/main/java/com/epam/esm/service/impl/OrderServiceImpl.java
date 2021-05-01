@@ -1,16 +1,13 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.impl.OrderDaoImpl;
-import com.epam.esm.dao.impl.UserDaoImpl;
+import com.epam.esm.dao.OrderDao;
+import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
-import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
-import com.epam.esm.model.Pageable;
-import com.epam.esm.model.SearchOrderByUserIdParams;
 import com.epam.esm.model.UserGift;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.OrderService;
@@ -27,16 +24,15 @@ import java.util.stream.Collectors;
 @Transactional
 @Service
 public class OrderServiceImpl implements OrderService {
-    private final OrderDaoImpl orderDao;
-    private final ModelMapper mapper;
-    private final UserDaoImpl userDao;
+    private final OrderDao orderDao;
+    private final UserDao userDao;
     private final GiftCertificateService certificateService;
+    private ModelMapper mapper = new ModelMapper();
 
 
     @Autowired
-    public OrderServiceImpl(OrderDaoImpl orderDao, ModelMapper mapper, GiftCertificateService certificateService, UserDaoImpl userDao) {
+    public OrderServiceImpl(OrderDao orderDao, GiftCertificateService certificateService, UserDao userDao) {
         this.orderDao = orderDao;
-        this.mapper = mapper;
         this.certificateService = certificateService;
         this.userDao = userDao;
     }
@@ -58,27 +54,12 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
         BigDecimal cost = certificates.stream()
                 .map(GiftCertificate::getPrice)
-                .reduce(BigDecimal::add).orElse(BigDecimal.valueOf(0));
+                .reduce(BigDecimal::add)
+                .orElse(BigDecimal.valueOf(0));
         return GiftOrder.builder()
                 .user(mapper.map(user, UserGift.class))
                 .certificates(certificates)
                 .cost(cost)
                 .build();
-    }
-
-    @Override
-    public GiftOrderWithoutCertificatesAndUser findUserOrderInfo(Long orderId, Long userId) throws ResourceNotFoundException {
-        return Optional.ofNullable(orderDao.findByUserIdAndOrderId(orderId, userId))
-                .map(byId -> mapper.map(byId, GiftOrderWithoutCertificatesAndUser.class))
-                .orElseThrow(ResourceNotFoundException::new);
-    }
-
-    @Override
-    public List<GiftOrder> findUserOrders(Long id, Pageable pageable) {
-        Optional.ofNullable(userDao.findById(id))
-                .orElseThrow(ResourceNotFoundException::new);
-        return orderDao.findOrdersByUserId(new SearchOrderByUserIdParams(id), pageable).stream()
-                .map(order -> mapper.map(order, GiftOrder.class))
-                .collect(Collectors.toList());
     }
 }

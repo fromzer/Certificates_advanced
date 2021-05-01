@@ -80,14 +80,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = ExistEntityException.class)
-    protected ResponseEntity<ErrorMessage> handleExistEntityException(ExistEntityException ex, Locale locale) {
+    protected ResponseEntity<ErrorMessage> handleExistEntityException(Locale locale) {
         String msg = messageSource.getMessage(RESOURCE_IS_EXIST_MESSAGE, null, locale);
         ErrorMessage errorMessage = new ErrorMessage(HttpStatus.CONFLICT.value(), msg, "40910");
         return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = {Exception.class})
-    protected ResponseEntity<ErrorMessage> handleExistEntityException(Locale locale) {
+    protected ResponseEntity<ErrorMessage> handleEntityException(Locale locale) {
         String msg = messageSource.getMessage(INTERNAL_SERVER_ERROR_MESSAGE, null, locale);
         ErrorMessage errorMessage = new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, "50010");
         return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);

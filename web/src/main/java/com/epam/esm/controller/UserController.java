@@ -1,16 +1,12 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.hateoas.OrderResource;
-import com.epam.esm.hateoas.TagResource;
-import com.epam.esm.hateoas.UserResource;
+import com.epam.esm.hateoas.HateoasResourceBuilder;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.model.UserGift;
-import com.epam.esm.service.GiftTagService;
-import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,34 +36,22 @@ import java.util.List;
  * @version 1.0.0
  */
 @RestController
-@RequestMapping(value = "/users", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/api/v1/users", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class UserController {
     private final UserService userService;
-    private final OrderService orderService;
-    private final GiftTagService tagService;
-    private final UserResource userResource;
-    private final OrderResource orderResource;
-    private final TagResource tagResource;
     private final Validator certificateValidator;
     private final Validator pageableValidator;
+    private final HateoasResourceBuilder resourceBuilder;
 
     @Autowired
     public UserController(UserService userService,
-                          OrderService orderService,
-                          GiftTagService tagService,
-                          UserResource userResource,
-                          OrderResource orderResource,
-                          TagResource tagResource,
                           @Qualifier("certificateValidator") Validator certificateValidator,
-                          @Qualifier("pageableValidator") Validator pageableValidator) {
+                          @Qualifier("pageableValidator") Validator pageableValidator,
+                          HateoasResourceBuilder resourceBuilder) {
         this.userService = userService;
-        this.orderService = orderService;
-        this.tagService = tagService;
-        this.userResource = userResource;
-        this.orderResource = orderResource;
-        this.tagResource = tagResource;
         this.certificateValidator = certificateValidator;
         this.pageableValidator = pageableValidator;
+        this.resourceBuilder = resourceBuilder;
     }
 
     @InitBinder("certificate")
@@ -88,7 +72,7 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<UserGift>> getUserById(@PathVariable @Min(value = 1) Long id) {
-        return ResponseEntity.ok(userResource.toModel(userService.findById(id)));
+        return ResponseEntity.ok(resourceBuilder.getUserResource().toModel(userService.findById(id)));
     }
 
     /**
@@ -101,7 +85,7 @@ public class UserController {
     @PostMapping("/{id}/orders")
     public ResponseEntity<Long> createOrder(@PathVariable @Min(value = 1) Long id,
                                             @Valid @RequestBody List<GiftCertificate> giftCertificates) {
-        return ResponseEntity.ok(orderService.createOrder(id, giftCertificates));
+        return ResponseEntity.ok(userService.createUserOrder(id, giftCertificates));
     }
 
     /**
@@ -114,8 +98,8 @@ public class UserController {
     @GetMapping("/{id}/orders")
     public ResponseEntity<CollectionModel<EntityModel<GiftOrder>>> getUserOrders(@PathVariable @Min(value = 1) Long id,
                                                                                  @Valid @ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(orderResource.toCollectionModel(
-                orderService.findUserOrders(id, pageable)));
+        return ResponseEntity.ok(resourceBuilder.getOrderResource().toCollectionModel(
+                userService.findUserOrders(id, pageable)));
     }
 
     /**
@@ -128,7 +112,7 @@ public class UserController {
     @GetMapping("/{id}/orders/{orderId}")
     public ResponseEntity<GiftOrderWithoutCertificatesAndUser> getUserOrder(@PathVariable @Min(value = 1) Long id,
                                                                             @PathVariable @Min(value = 1) Long orderId) {
-        return ResponseEntity.ok(orderService.findUserOrderInfo(orderId, id));
+        return ResponseEntity.ok(userService.findUserOrderInfo(orderId, id));
     }
 
     /**
@@ -139,7 +123,7 @@ public class UserController {
      */
     @GetMapping("/{id}/tag")
     public ResponseEntity<EntityModel<GiftTag>> getMostPopularUserTag(@PathVariable @Min(value = 1) Long id) {
-        return ResponseEntity.ok(tagResource.toModel(tagService.findMostPopularUserTag(id)));
+        return ResponseEntity.ok(resourceBuilder.getTagResource().toModel(userService.findMostPopularUserTag(id)));
     }
 
     /**
@@ -150,7 +134,7 @@ public class UserController {
      */
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(@Valid @ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(userResource.toCollectionModel(
+        return ResponseEntity.ok(resourceBuilder.getUserResource().toCollectionModel(
                 userService.findAll(pageable)));
     }
 }

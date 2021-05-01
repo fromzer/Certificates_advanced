@@ -39,9 +39,17 @@ public class Certificate extends PersistentObject implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "description")
     private String description;
+
+    @Column(name = "price")
     private BigDecimal price;
+
+    @Column(name = "duration")
     private Integer duration;
 
     @Column(name = "create_date")
@@ -51,7 +59,7 @@ public class Certificate extends PersistentObject implements Serializable {
     private ZonedDateTime lastUpdateDate;
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH},
-            fetch = FetchType.EAGER)
+            fetch = FetchType.LAZY)
     @JoinTable(
             name = "gift_certificate_tag",
             joinColumns = @JoinColumn(name = "gift_certificate_id"),

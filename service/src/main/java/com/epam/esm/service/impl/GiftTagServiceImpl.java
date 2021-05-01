@@ -1,6 +1,6 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.impl.GiftTagDAOImpl;
+import com.epam.esm.dao.GiftTagDao;
 import com.epam.esm.exception.ExistEntityException;
 import com.epam.esm.model.Pageable;
 import com.epam.esm.entity.Tag;
@@ -25,12 +25,11 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class GiftTagServiceImpl implements GiftTagService {
-    private final GiftTagDAOImpl tagDAO;
-    private final ModelMapper modelMapper;
+    private final GiftTagDao tagDAO;
+    private ModelMapper modelMapper = new ModelMapper();
 
-    public GiftTagServiceImpl(GiftTagDAOImpl tagDAO, ModelMapper modelMapper) {
+    public GiftTagServiceImpl(GiftTagDao tagDAO) {
         this.tagDAO = tagDAO;
-        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -43,13 +42,6 @@ public class GiftTagServiceImpl implements GiftTagService {
         } catch (CreateEntityException e) {
             log.error("Failed to create tag", e);
             throw new CreateResourceException("Failed to create tag", e);
-        }
-    }
-
-    private void isTagExist(GiftTag entity) {
-        Tag byName = tagDAO.findByName(entity.getName());
-        if (byName != null) {
-            throw new ExistEntityException();
         }
     }
 
@@ -71,13 +63,6 @@ public class GiftTagServiceImpl implements GiftTagService {
     }
 
     @Override
-    public GiftTag findMostPopularUserTag(Long userId) throws ResourceNotFoundException {
-        return Optional.ofNullable(tagDAO.findMostPopularUserTag(userId))
-                .map(tag -> modelMapper.map(tag, GiftTag.class))
-                .orElseThrow(ResourceNotFoundException::new);
-    }
-
-    @Override
     public void delete(Long id) {
         Tag byId = Optional.ofNullable(tagDAO.findById(id))
                 .orElseThrow(ResourceNotFoundException::new);
@@ -94,5 +79,12 @@ public class GiftTagServiceImpl implements GiftTagService {
                     .collect(Collectors.toList());
         }
         return convertedAllTags;
+    }
+
+    private void isTagExist(GiftTag entity) {
+        Tag byName = tagDAO.findByName(entity.getName());
+        if (byName != null) {
+            throw new ExistEntityException();
+        }
     }
 }

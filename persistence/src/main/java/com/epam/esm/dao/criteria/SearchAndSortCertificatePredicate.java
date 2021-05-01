@@ -34,16 +34,20 @@ public class SearchAndSortCertificatePredicate implements PredicateConstructor<S
         Predicate result;
         String[] tagsName = tagName.split(",");
         if (tagsName.length > 1) {
-            List<Predicate> predicateList = Arrays.stream(tagsName)
-                    .map(name -> joinTags(cb, root, name))
-                    .collect(Collectors.toList());
-            Predicate[] predicates = new Predicate[predicateList.size()];
-            result = cb.and(predicateList.toArray(predicates));
+            result = getPredicateLotsOfTags(cb, root, tagsName);
         } else {
             Join<Certificate, Tag> tagJoin = root.join(TAGS);
             result = cb.equal(tagJoin.get(NAME), tagName);
         }
         return result;
+    }
+
+    private Predicate getPredicateLotsOfTags(CriteriaBuilder cb, Root<Certificate> root, String[] tagsName) {
+        List<Predicate> predicateList = Arrays.stream(tagsName)
+                .map(name -> joinTags(cb, root, name))
+                .collect(Collectors.toList());
+        Predicate[] predicates = new Predicate[predicateList.size()];
+        return cb.and(predicateList.toArray(predicates));
     }
 
     private Predicate joinTags(CriteriaBuilder cb, Root<Certificate> root, String name) {

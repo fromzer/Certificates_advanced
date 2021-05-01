@@ -2,6 +2,7 @@ package com.epam.esm.hateoas;
 
 import com.epam.esm.controller.TagController;
 import com.epam.esm.model.GiftTag;
+import com.epam.esm.model.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -9,29 +10,27 @@ import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Objects;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class TagResource implements SimpleRepresentationModelAssembler<GiftTag> {
-    private static final String GET_BY_ID = "get_tag_by_id";
-    private static final String GET_ALL = "get_all_tags";
-    private static final String PAGE_OPTIONS = "page=1&size=20";
 
     @Override
     public void addLinks(EntityModel<GiftTag> resource) {
-        resource.add(linkTo(methodOn(TagController.class).getTagById(resource.getContent().getId())).withRel(GET_BY_ID));
-        resource.add(linkTo(methodOn(TagController.class).getAll(null)).withRel(GET_ALL));
+        resource.add(linkTo(methodOn(TagController.class).getTagById(Objects.requireNonNull(resource.getContent()).getId())).withSelfRel()); //??
+        resource.add(linkTo(methodOn(TagController.class).getAll(new Pageable())).withSelfRel());
     }
 
     @Override
     public void addLinks(CollectionModel<EntityModel<GiftTag>> resources) {
         UriComponentsBuilder componentsBuilder = linkTo(methodOn(TagController.class)
-                .getAll(null))
-                .toUriComponentsBuilder()
-                .replaceQuery(PAGE_OPTIONS);
+                .getAll(new Pageable()))
+                .toUriComponentsBuilder();
         componentsBuilder.encode();
         Link link = Link.of(componentsBuilder.toUriString());
-        resources.add(link.withRel(GET_ALL));
+        resources.add(link.withSelfRel());
     }
 }
