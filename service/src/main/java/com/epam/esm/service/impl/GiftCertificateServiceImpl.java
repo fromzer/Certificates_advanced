@@ -135,6 +135,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private void searchExistingTag(GiftCertificate giftCertificate) {
         if (CollectionUtils.isNotEmpty(giftCertificate.getTags())) {
             for (GiftTag giftTag : giftCertificate.getTags()) {
+                Optional.ofNullable(giftTag.getName()).orElseThrow(CreateResourceException::new);
                 Tag byName = tagDAO.findByName(giftTag.getName());
                 if (byName != null) {
                     throw new ExistEntityException();

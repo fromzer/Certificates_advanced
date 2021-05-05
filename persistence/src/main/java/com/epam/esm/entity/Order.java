@@ -4,6 +4,7 @@ import com.epam.esm.entity.audit.AuditListener;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.CascadeType;
@@ -29,6 +30,7 @@ import java.util.List;
 @EntityListeners(AuditListener.class)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper=false)
 @Builder
 public class Order extends PersistentObject implements Serializable {
     @Id

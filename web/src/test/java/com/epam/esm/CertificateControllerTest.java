@@ -3,6 +3,8 @@ package com.epam.esm;
 import com.epam.esm.controller.CertificateController;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftTag;
+import com.epam.esm.model.Pageable;
+import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.service.GiftCertificateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,13 +14,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -109,6 +117,31 @@ public class CertificateControllerTest {
         mockMvc.perform(
                 delete("/api/v1/certificates/{id}", certificate.getId()))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void shouldGetAllCertificates() {
+        SearchAndSortCertificateParams params = new SearchAndSortCertificateParams(null, null, null, null);
+        GiftCertificate giftCertificateFirst = certificate;
+        GiftCertificate giftCertificateSecond = GiftCertificate.builder()
+                .id(1l)
+                .name("new NAME")
+                .description("car")
+                .price(BigDecimal.valueOf(11.00))
+                .duration(7)
+                .build();
+        List<GiftCertificate> giftCertificates = new ArrayList<>();
+        giftCertificates.add(giftCertificateFirst);
+        giftCertificates.add(giftCertificateSecond);
+        Pageable pageable = new Pageable();
+        when(certificateService.findCertificateByParams(params, pageable)).thenReturn(giftCertificates);
+        ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> certificates = controller.getCertificatesWithParameters(params, new Pageable());
+        List<GiftCertificate> collect = certificates.getBody().getContent().stream()
+                .map(model -> model.getContent())
+                .collect(Collectors.toList());
+        assertThat(collect.size()).isEqualTo(giftCertificates.size());
+        assertThat(collect.get(1).getName()).isEqualTo(giftCertificates.get(1).getName());
+        assertThat(collect.get(0).getName()).isEqualTo(giftCertificates.get(0).getName());
     }
 
     @Test

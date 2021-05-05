@@ -12,6 +12,11 @@ dependencies {
 configurations.testCompile {
     exclude group: 'ch.qos.logback', module: 'logback-classic'
 }
+
+bootJar {
+    enabled = false
+}
+
 jar {
     enabled = true
 }

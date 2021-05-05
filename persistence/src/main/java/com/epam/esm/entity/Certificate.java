@@ -33,7 +33,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = "orders")
+@EqualsAndHashCode(exclude = "orders", callSuper=false)
 @ToString(exclude = "orders")
 public class Certificate extends PersistentObject implements Serializable {
     @Id
