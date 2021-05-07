@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -27,11 +28,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String CREATE_RESOURCE_MESSAGE = "exception.createResource";
     private static final String DELETE_RESOURCE_MESSAGE = "exception.deleteResource";
     private static final String RESOURCE_NOT_FOUND_MESSAGE = "exception.resourceNotFound";
+    private static final String INVALID_PARAMS_MESSAGE = "exception.invalidParams";
     private static final String RESOURCE_IS_EXIST_MESSAGE = "exception.resourceIsExist";
     private static final String UPDATE_RESOURCE_MESSAGE = "exception.updateResource";
     private static final String TYPE_MISMATCH_MESSAGE = "exception.typeMismatch";
     private static final String INTERNAL_SERVER_ERROR_MESSAGE = "exception.internalServer";
     private static final String METHOD_NOT_SUPPORTED = "exception.methodNotSupported";
+    private static final String NOT_VALID_VALUE = "exception.notValidValue";
     private final MessageSource messageSource;
     private final Locale defaultLocale = Locale.getDefault();
 
@@ -55,11 +58,18 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = ResourceNotFoundException.class)
+    @ExceptionHandler(value = {ResourceNotFoundException.class, EntityRetrievalException.class})
     protected ResponseEntity<ErrorMessage> handleResourceNotFoundException(Locale locale) {
         String msg = messageSource.getMessage(RESOURCE_NOT_FOUND_MESSAGE, null, locale);
         ErrorMessage errorMessage = new ErrorMessage(HttpStatus.NOT_FOUND.value(), msg, "40411");
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    protected ResponseEntity<ErrorMessage> handleInvalidParamsException(Locale locale) {
+        String msg = messageSource.getMessage(INVALID_PARAMS_MESSAGE, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), msg, "40011");
+        return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = CreateResourceException.class)
@@ -70,14 +80,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = ExistEntityException.class)
-    protected ResponseEntity<ErrorMessage> handleExistEntityException(ExistEntityException ex, Locale locale) {
+    protected ResponseEntity<ErrorMessage> handleExistEntityException(Locale locale) {
         String msg = messageSource.getMessage(RESOURCE_IS_EXIST_MESSAGE, null, locale);
-        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.CONFLICT.value(), msg + ex.getMessage(), "40910");
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.CONFLICT.value(), msg, "40910");
         return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(value = {Exception.class, RuntimeException.class})
-    protected ResponseEntity<ErrorMessage> handleExistEntityException(Locale locale) {
+    @ExceptionHandler(value = {Exception.class})
+    protected ResponseEntity<ErrorMessage> handleEntityException(Locale locale) {
         String msg = messageSource.getMessage(INTERNAL_SERVER_ERROR_MESSAGE, null, locale);
         ErrorMessage errorMessage = new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, "50010");
         return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -125,7 +135,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", status.value());
         body.put("errorMessage", msg);
-        body.put("errorCode", status.value() + "" + (status.value() / 10 + 0));
+        body.put("errorCode", status.value() + "" + (status.value() / 10));
         return new ResponseEntity<>(body, headers, status);
     }
 
@@ -136,6 +146,16 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", status.value());
         body.put("errorMessage", msg);
         body.put("errorCode", status.value() + "" + (status.value() / 10 + 18));
+        return new ResponseEntity<>(body, headers, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        String msg = messageSource.getMessage(NOT_VALID_VALUE, null, defaultLocale);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", status.value());
+        body.put("errorMessage", msg);
+        body.put("errorCode", status.value() + "" + (status.value() / 10 + 20));
         return new ResponseEntity<>(body, headers, status);
     }
 }

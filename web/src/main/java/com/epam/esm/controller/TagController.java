@@ -1,17 +1,21 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.exception.CreateResourceException;
-import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.hateoas.TagResource;
 import com.epam.esm.model.GiftTag;
+import com.epam.esm.model.Pageable;
 import com.epam.esm.service.GiftTagService;
-import com.epam.esm.validation.TagValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.List;
 
 /**
  * Rest controller for Tags
@@ -29,29 +32,40 @@ import java.util.List;
  * @version 1.0.0
  */
 @RestController
-@RequestMapping(value = "/tags", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/api/v1/tags", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class TagController {
 
-    private GiftTagService tagService;
-    private TagValidator tagValidator;
+    private final GiftTagService tagService;
+    private final TagResource tagResource;
+    private final Validator tagValidator;
+    private final Validator pageableValidator;
 
     @Autowired
-    public TagController(GiftTagService tagService, TagValidator tagValidator) {
+    public TagController(GiftTagService tagService,
+                         TagResource tagResource,
+                         @Qualifier("tagValidator") Validator tagValidator,
+                         @Qualifier("pageableValidator") Validator pageableValidator) {
         this.tagService = tagService;
+        this.tagResource = tagResource;
         this.tagValidator = tagValidator;
+        this.pageableValidator = pageableValidator;
     }
 
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
+    @InitBinder("tag")
+    public void initTagBinder(WebDataBinder binder) {
         binder.addValidators(tagValidator);
+    }
+
+    @InitBinder("pageable")
+    public void initPageableBinder(WebDataBinder binder) {
+        binder.addValidators(pageableValidator);
     }
 
     /**
      * Create tag
      *
      * @param tag the GiftTag
-     * @return the response entity
-     * @throws CreateResourceException the service exception
+     * @return the tag id
      */
     @PostMapping
     public ResponseEntity<Long> create(@Valid @RequestBody GiftTag tag) {
@@ -63,10 +77,9 @@ public class TagController {
      *
      * @param id the GiftTag id
      * @return the response entity
-     * @throws ResourceNotFoundException the resource not found exception
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable @Min(value = 0) Long id) {
+    public ResponseEntity<Void> delete(@PathVariable @Min(value = 1) Long id) {
         tagService.delete(id);
         return ResponseEntity.noContent().build();
     }
@@ -76,21 +89,22 @@ public class TagController {
      *
      * @param id the GiftTag id
      * @return the tag
-     * @throws ResourceNotFoundException the resource not found exception
      */
     @GetMapping("/{id}")
-    public ResponseEntity<GiftTag> getTagById(@PathVariable @Min(value = 0) Long id) {
-        return ResponseEntity.ok(tagService.findById(id));
+    public ResponseEntity<EntityModel<GiftTag>> getTagById(@PathVariable @Min(value = 1) Long id) {
+        return ResponseEntity.ok(tagResource.toModel(tagService.findById(id)));
     }
 
     /**
      * Get all tags
      *
+     * @param pageable the pagination
      * @return List of GiftTags
-     * @throws ResourceNotFoundException the resource not found exception
      */
     @GetMapping
-    public ResponseEntity<List<GiftTag>> getAll() {
-        return ResponseEntity.ok(tagService.findAll());
+    public ResponseEntity<CollectionModel<EntityModel<GiftTag>>> getAll(@Valid @ModelAttribute Pageable pageable) {
+        return ResponseEntity.ok(
+                tagResource.toCollectionModel(
+                        tagService.findAll(pageable)));
     }
 }

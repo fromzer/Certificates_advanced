@@ -1,4 +1,4 @@
-rootProject.name = 'Certificates'
+rootProject.name = 'Certificates_advanced'
 include 'persistence'
 include 'service'
 include 'web'

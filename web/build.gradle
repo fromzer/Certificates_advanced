@@ -1,6 +1,9 @@
 plugins {
     id 'war'
+    id 'application'
 }
+
+mainClassName = "com.epam.esm.Application"
 
 war {
     archivesBaseName = 'Certificates'
@@ -11,15 +14,21 @@ dependencies {
     implementation project(':persistence')
     implementation project(':service')
     implementation project(':api')
-    implementation group: 'org.springframework', name: 'spring-context', version: springVersion
-    implementation group: 'org.springframework', name: 'spring-webmvc', version: springVersion
-    implementation group: 'org.springframework', name: 'spring-web', version: springVersion
-    implementation group: 'org.springframework', name: 'spring-context-support', version: springVersion
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: jxServletApiVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatatypeVersion
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: mysqlConnectorVersion
     implementation group: 'javax.validation', name: 'validation-api', version: jxValidationApiVersion
-    testCompile group: 'org.springframework', name: 'spring-test', version: springVersion
-    testCompile 'org.junit.jupiter:junit-jupiter-api:5.+'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation group: 'com.h2database', name: 'h2', version: h2dbVersion
+    implementation "junit:junit:$junitVersion"
+    implementation "org.junit.jupiter:junit-jupiter:$junitJupiterVersion"
 }
+
+test {
+    useJUnitPlatform()
+}
+

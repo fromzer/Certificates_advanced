@@ -1,17 +1,17 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.exception.CreateResourceException;
-import com.epam.esm.exception.DeleteResourceException;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.UpdateResourceException;
+import com.epam.esm.hateoas.CertificateResource;
+import com.epam.esm.model.Pageable;
+import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.model.GiftCertificate;
-import com.epam.esm.model.SearchAndSortGiftCertificateOptions;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.validation.CertificateValidator;
-import com.epam.esm.validation.SearchAndSortOptionsValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.List;
 
 /**
  * Rest controller for Certificates
@@ -35,27 +34,41 @@ import java.util.List;
  * @version 1.0.0
  */
 @RestController
-@RequestMapping(value = "/certificates", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/api/v1/certificates", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class CertificateController {
-    private GiftCertificateService giftCertificateService;
-
-    private CertificateValidator certificateValidator;
-    private SearchAndSortOptionsValidator optionsValidator;
+    private final GiftCertificateService giftCertificateService;
+    private final CertificateResource certificateResource;
+    private final Validator certificateValidator;
+    private final Validator paramsValidator;
+    private final Validator pageableValidator;
 
     @Autowired
-    public CertificateController(GiftCertificateService giftCertificateService, CertificateValidator certificateValidator, SearchAndSortOptionsValidator optionsValidator) {
+    public CertificateController(
+            GiftCertificateService giftCertificateService,
+            @Qualifier("certificateValidator") Validator certificateValidator,
+            @Qualifier("searchAndSortParamsValidator") Validator paramsValidator,
+            CertificateResource certificateResource,
+            @Qualifier("pageableValidator") Validator pageableValidator) {
         this.giftCertificateService = giftCertificateService;
         this.certificateValidator = certificateValidator;
-        this.optionsValidator = optionsValidator;
+        this.paramsValidator = paramsValidator;
+        this.certificateResource = certificateResource;
+        this.pageableValidator = pageableValidator;
     }
 
-    @InitBinder
-    protected void initBinderCreate(WebDataBinder binder) {
-        if (binder.getTarget() instanceof GiftCertificate) {
-            binder.addValidators(certificateValidator);
-        } else if (binder.getTarget() instanceof SearchAndSortGiftCertificateOptions) {
-            binder.addValidators(optionsValidator);
-        }
+    @InitBinder("certificate")
+    public void initCertificateBinder(WebDataBinder binder) {
+        binder.addValidators(certificateValidator);
+    }
+
+    @InitBinder("params")
+    public void initSearchParamsBinder(WebDataBinder binder) {
+        binder.addValidators(paramsValidator);
+    }
+
+    @InitBinder("pageable")
+    public void initPageableBinder(WebDataBinder binder) {
+        binder.addValidators(pageableValidator);
     }
 
     /**
@@ -63,7 +76,6 @@ public class CertificateController {
      *
      * @param giftCertificate the certificate
      * @return new certificate's id
-     * @throws CreateResourceException the service exception
      */
     @PostMapping
     public ResponseEntity<Long> create(@Valid @RequestBody GiftCertificate giftCertificate) {
@@ -75,11 +87,10 @@ public class CertificateController {
      *
      * @param giftCertificate the certificate and optionally tags
      * @return certificate and tags
-     * @throws UpdateResourceException the service exception
      */
     @PatchMapping("/{id}")
     public ResponseEntity<GiftCertificate> update(@Valid @RequestBody GiftCertificate giftCertificate,
-                                                  @PathVariable @Min(value = 0) Long id) {
+                                                  @PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(giftCertificateService.update(giftCertificate, id));
     }
 
@@ -88,11 +99,9 @@ public class CertificateController {
      *
      * @param id the certificate id
      * @return response entity
-     * @throws DeleteResourceException   the service exception
-     * @throws ResourceNotFoundException the resource not found exception
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable @Min(value = 0) Long id) {
+    public ResponseEntity<Void> delete(@PathVariable @Min(value = 1) Long id) {
         giftCertificateService.delete(id);
         return ResponseEntity.noContent().build();
     }
@@ -100,24 +109,27 @@ public class CertificateController {
     /**
      * Get certificate by id
      *
-     * @param id the GiftCertificate id
-     * @return the giftTag
-     * @throws ResourceNotFoundException the resource not found exception
+     * @param id the certificate id
+     * @return the certificate
      */
     @GetMapping("/{id}")
-    public ResponseEntity<GiftCertificate> getCertificateById(@PathVariable @Min(value = 0) Long id) {
-        return ResponseEntity.ok(giftCertificateService.findById(id));
+    public ResponseEntity<EntityModel<GiftCertificate>> getCertificateById(@PathVariable @Min(value = 1) Long id) {
+        return ResponseEntity.ok(certificateResource.toModel(giftCertificateService.findById(id)));
     }
 
     /**
      * Get certificates by parameters
      *
-     * @param options the search and sort params
-     * @return list of giftCertificate
+     * @param params   the search and sort params
+     * @param pageable the pagination
+     * @return list of certificates
      */
     @GetMapping
-    public ResponseEntity<List<GiftCertificate>> getCertificatesWithParameters(
-            @ModelAttribute SearchAndSortGiftCertificateOptions options) {
-        return ResponseEntity.ok(giftCertificateService.findCertificateByParams(options));
+    public ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> getCertificatesWithParameters(
+            @Valid @ModelAttribute SearchAndSortCertificateParams params,
+            @Valid @ModelAttribute Pageable pageable) {
+        return ResponseEntity
+                .ok(certificateResource.toCollectionModel(
+                        giftCertificateService.findCertificateByParams(params, pageable)));
     }
 }

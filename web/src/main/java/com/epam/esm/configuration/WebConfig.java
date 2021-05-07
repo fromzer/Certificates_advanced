@@ -22,6 +22,9 @@ import java.util.List;
 @EnableWebMvc
 @Import(ServiceConfiguration.class)
 public class WebConfig implements WebMvcConfigurer {
+    private static final String CLASSPATH = "classpath:messages";
+    private static final String ENCODING = "UTF-8";
+
     @Bean
     public ObjectMapper getObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -39,8 +42,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
-        ms.setBasename("classpath:messages");
-        ms.setDefaultEncoding("UTF-8");
+        ms.setBasename(CLASSPATH);
+        ms.setDefaultEncoding(ENCODING);
         return ms;
     }
 }
